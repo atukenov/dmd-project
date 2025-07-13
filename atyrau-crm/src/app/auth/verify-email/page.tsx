@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/atoms/Button';
 import { Card } from '@/components/atoms/Card';
 
-export default function VerifyEmailPage() {
+function VerifyEmailPageForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams?.get('token');
@@ -45,9 +45,9 @@ export default function VerifyEmailPage() {
       
       setStatus('success');
       setMessage('Ваш email успешно подтвержден!');
-    } catch (error: any) {
+    } catch (error: unknown) {
       setStatus('error');
-      setMessage(error.message || 'Ошибка верификации email');
+      setMessage(error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : 'Ошибка верификации email');
     }
   };
 
@@ -75,8 +75,8 @@ export default function VerifyEmailPage() {
       }
       
       setMessage('Письмо с подтверждением отправлено повторно. Пожалуйста, проверьте вашу почту.');
-    } catch (error: any) {
-      setMessage(error.message || 'Ошибка отправки письма');
+    } catch (error: unknown) {
+      setMessage(error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : 'Ошибка отправки письма');
     } finally {
       setIsResending(false);
     }
@@ -107,7 +107,7 @@ export default function VerifyEmailPage() {
             </div>
             
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Не получили письмо? Проверьте папку "Спам" или используйте кнопку выше для повторной отправки.
+              Не получили письмо? Проверьте папку &ldquo;Спам&rdquo; или используйте кнопку выше для повторной отправки.
             </p>
           </div>
         )}
@@ -157,5 +157,16 @@ export default function VerifyEmailPage() {
         )}
       </Card>
     </div>
+  );
+}
+
+
+
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center min-h-screen">????????...</div>}>
+      <VerifyEmailPageForm />
+    </Suspense>
   );
 }

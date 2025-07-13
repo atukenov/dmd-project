@@ -80,11 +80,13 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({
       message: "Service deleted successfully",
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error deleting service:", error);
     return NextResponse.json(
-      { message: "Failed to delete service", error: error.message },
+      { message: "Failed to delete service", error: error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" },
       { status: 500 }
     );
   }
 }
+
+

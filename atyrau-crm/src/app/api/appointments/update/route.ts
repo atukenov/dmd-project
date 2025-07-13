@@ -60,7 +60,14 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Build update object
-    const updateData: any = { updatedAt: new Date() };
+    interface UpdateData {
+      updatedAt: Date;
+      status?: string;
+      paymentStatus?: string;
+      notes?: string;
+    }
+    
+    const updateData: UpdateData = { updatedAt: new Date() };
 
     if (status) {
       updateData.status = status;
@@ -88,11 +95,14 @@ export async function PATCH(request: NextRequest) {
       message: "Appointment updated successfully",
       appointment: updatedAppointment,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error updating appointment:", error);
+    const errorMessage = error instanceof Error ? error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" : "Unknown error";
     return NextResponse.json(
-      { message: "Failed to update appointment", error: error.message },
+      { message: "Failed to update appointment", error: errorMessage },
       { status: 500 }
     );
   }
 }
+
+

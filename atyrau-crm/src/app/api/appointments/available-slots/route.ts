@@ -83,18 +83,6 @@ export async function GET(request: NextRequest) {
     }));
 
     // Get time slots using the utility function
-    const dayOfWeek = date.getDay();
-    const dayNames = [
-      "sunday",
-      "monday",
-      "tuesday",
-      "wednesday",
-      "thursday",
-      "friday",
-      "saturday",
-    ];
-    const dayName = dayNames[dayOfWeek];
-
     // If no working hours for this business yet, return empty array
     if (!business.workingHours) {
       return NextResponse.json({ slots: [] });
@@ -108,11 +96,13 @@ export async function GET(request: NextRequest) {
     );
 
     return NextResponse.json({ slots });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error fetching available slots:", error);
     return NextResponse.json(
-      { message: "Failed to fetch available time slots", error: error.message },
+      { message: "Failed to fetch available time slots", error: error instanceof Error ? error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" : 'Unknown error' },
       { status: 500 }
     );
   }
 }
+
+

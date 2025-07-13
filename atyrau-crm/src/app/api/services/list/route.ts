@@ -82,11 +82,13 @@ export async function GET(request: NextRequest) {
       .toArray();
 
     return NextResponse.json({ services });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error fetching services:", error);
     return NextResponse.json(
-      { message: "Failed to fetch services", error: error.message },
+      { message: "Failed to fetch services", error: error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" },
       { status: 500 }
     );
   }
 }
+
+

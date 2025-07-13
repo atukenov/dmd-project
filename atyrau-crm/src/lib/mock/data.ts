@@ -128,3 +128,4 @@ export const appointments = [
     updatedAt: new Date("2025-07-01"),
   },
 ];
+

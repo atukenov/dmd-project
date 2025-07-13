@@ -176,7 +176,7 @@ export default function ServicesPage() {
       resetForm();
     } catch (error) {
       console.error('Error submitting service:', error);
-      setSubmitError(error instanceof Error ? error.message : 'An unexpected error occurred');
+      setSubmitError(error instanceof Error ? error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" : 'An unexpected error occurred');
     } finally {
       setIsSubmitting(false);
     }
@@ -206,7 +206,7 @@ export default function ServicesPage() {
       setConfirmDelete(null);
     } catch (error) {
       console.error('Error deleting service:', error);
-      alert(`Failed to delete service: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      alert(`Failed to delete service: ${error instanceof Error ? error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" : 'Unknown error'}`);
     }
   };
 
@@ -584,3 +584,5 @@ export default function ServicesPage() {
     </div>
   );
 }
+
+

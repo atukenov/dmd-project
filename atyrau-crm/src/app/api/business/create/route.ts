@@ -99,8 +99,17 @@ export async function POST(request: NextRequest) {
 
     // Create services in the services collection
     if (businessData.services && businessData.services.length > 0) {
+      interface ServiceInput {
+        name: string;
+        duration?: number;
+        price?: number;
+        description?: string;
+        category?: string;
+        image?: string;
+      }
+      
       const servicesWithBusinessId: Service[] = businessData.services.map(
-        (service: any) => ({
+        (service: ServiceInput) => ({
           businessId: businessId.toString(),
           name: service.name,
           duration: service.duration || 60, // Default duration in minutes
@@ -143,3 +152,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

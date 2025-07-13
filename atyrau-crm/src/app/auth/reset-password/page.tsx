@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { FormField } from '@/components/molecules/FormField';
@@ -18,7 +18,7 @@ interface FormErrors {
   general?: string;
 }
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams?.get('token');
@@ -90,10 +90,10 @@ export default function ResetPasswordPage() {
       
       // On success, show the message
       setIsSubmitted(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
       setErrors(prev => ({
         ...prev,
-        general: error.message || 'Произошла ошибка при сбросе пароля',
+        general: error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : 'Произошла ошибка при сбросе пароля',
       }));
     } finally {
       setIsLoading(false);
@@ -176,3 +176,12 @@ export default function ResetPasswordPage() {
     </div>
   );
 }
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center min-h-screen">Загрузка...</div>}>
+      <ResetPasswordForm />
+    </Suspense>
+  );
+}
+

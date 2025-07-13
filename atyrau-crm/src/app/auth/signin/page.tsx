@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
@@ -19,7 +19,7 @@ interface FormErrors {
   general?: string;
 }
 
-export default function SigninPage() {
+function SigninPageForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams?.get('callbackUrl') || '/dashboard';
@@ -74,10 +74,10 @@ export default function SigninPage() {
       }
       
       router.push(callbackUrl);
-    } catch (error: any) {
+    } catch (error: unknown) {
       setErrors(prev => ({
         ...prev,
-        general: error.message || 'Ошибка при входе',
+        general: error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : 'Ошибка при входе',
       }));
     } finally {
       setIsLoading(false);
@@ -163,5 +163,16 @@ export default function SigninPage() {
         </div>
       </Card>
     </div>
+  );
+}
+
+
+
+
+export default function SigninPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center min-h-screen">????????...</div>}>
+      <SigninPageForm />
+    </Suspense>
   );
 }

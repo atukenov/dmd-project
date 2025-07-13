@@ -61,7 +61,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Build query filter
-    const filter: any = {};
+    interface ClientFilter {
+      businessId?: ObjectId;
+      $or?: Array<{
+        name?: { $regex: string; $options: string };
+        email?: { $regex: string; $options: string };
+        phone?: { $regex: string; $options: string };
+      }>;
+    }
+    
+    const filter: ClientFilter = {};
 
     if (targetBusinessId) {
       filter.businessId = new ObjectId(targetBusinessId);
@@ -148,11 +157,14 @@ export async function GET(request: NextRequest) {
       limit,
       totalPages: Math.ceil(totalClients / limit),
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error fetching clients:", error);
+    const errorMessage = error instanceof Error ? error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" : "Unknown error";
     return NextResponse.json(
-      { message: "Failed to fetch clients", error: error.message },
+      { message: "Failed to fetch clients", error: errorMessage },
       { status: 500 }
     );
   }
 }
+
+

@@ -65,11 +65,13 @@ export async function POST(request: NextRequest) {
         _id: result.insertedId,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error creating service:", error);
     return NextResponse.json(
-      { message: "Failed to create service", error: error.message },
+      { message: "Failed to create service", error: error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" },
       { status: 500 }
     );
   }
 }
+
+

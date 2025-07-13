@@ -61,7 +61,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Build query filter
-    const filter: any = {};
+    interface AppointmentFilter {
+      businessId?: ObjectId;
+      startTime?: {
+        $gte?: Date;
+        $lte?: Date;
+      };
+      status?: string;
+    }
+    
+    const filter: AppointmentFilter = {};
 
     if (targetBusinessId) {
       filter.businessId = new ObjectId(targetBusinessId);
@@ -133,11 +142,14 @@ export async function GET(request: NextRequest) {
     );
 
     return NextResponse.json({ appointments: appointmentsWithDetails });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error fetching appointments:", error);
+    const errorMessage = error instanceof Error ? error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" : "Unknown error";
     return NextResponse.json(
-      { message: "Failed to fetch appointments", error: error.message },
+      { message: "Failed to fetch appointments", error: errorMessage },
       { status: 500 }
     );
   }
 }
+
+

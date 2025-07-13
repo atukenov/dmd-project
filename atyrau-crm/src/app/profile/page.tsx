@@ -47,7 +47,7 @@ export default function ProfilePage() {
 
       setMessage('Profile updated successfully');
       setIsEditing(false);
-    } catch (err: any) {
+    } catch ($1: unknown) {
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -303,3 +303,4 @@ export default function ProfilePage() {
     </div>
   );
 }
+

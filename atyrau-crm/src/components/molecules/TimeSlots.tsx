@@ -48,7 +48,7 @@ export function TimeSlots({
         
         const data = await response.json();
         setTimeSlots(data.slots);
-      } catch (err: any) {
+      } catch ($1: unknown) {
         setError(err.message);
         setTimeSlots([]);
       } finally {
@@ -137,3 +137,4 @@ export function TimeSlots({
     </div>
   );
 }
+

@@ -102,11 +102,13 @@ export async function POST(request: NextRequest) {
         _id: result.insertedId,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error creating client:", error);
     return NextResponse.json(
-      { message: "Failed to create client", error: error.message },
+      { message: "Failed to create client", error: error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" },
       { status: 500 }
     );
   }
 }
+
+

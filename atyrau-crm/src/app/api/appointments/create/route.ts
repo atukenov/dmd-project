@@ -140,11 +140,13 @@ export async function POST(request: NextRequest) {
         _id: result.insertedId,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error booking appointment:", error);
     return NextResponse.json(
-      { message: "Failed to book appointment", error: error.message },
+      { message: "Failed to book appointment", error: error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" },
       { status: 500 }
     );
   }
 }
+
+

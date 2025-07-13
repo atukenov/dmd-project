@@ -144,7 +144,7 @@ export default function BusinessProfileSetup() {
       } catch (error) {
         console.error('Error loading business data:', error);
         // Only show error if it's not a 404 (business not found)
-        if (error instanceof Error && !error.message.includes('404')) {
+        if (error instanceof Error && !error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error".includes('404')) {
           setError('Не удалось загрузить данные бизнеса');
         }
       } finally {
@@ -884,3 +884,5 @@ export default function BusinessProfileSetup() {
     </div>
   );
 }
+
+

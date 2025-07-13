@@ -60,7 +60,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Build update object
-    const updateData: any = { updatedAt: new Date() };
+    const updateData: Record<string, unknown> = { updatedAt: new Date() };
 
     if (name !== undefined) {
       updateData.name = name;
@@ -96,11 +96,13 @@ export async function PATCH(request: NextRequest) {
       message: "Service updated successfully",
       service: updatedService,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error updating service:", error);
     return NextResponse.json(
-      { message: "Failed to update service", error: error.message },
+      { message: "Failed to update service", error: error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" },
       { status: 500 }
     );
   }
 }
+
+

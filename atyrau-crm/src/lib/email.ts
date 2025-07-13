@@ -108,3 +108,4 @@ export async function sendAppointmentConfirmation(
 ) {
   // Implementation for sending appointment confirmations...
 }
+

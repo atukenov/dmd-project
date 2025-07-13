@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
 import { Card } from '../../components/atoms/Card';
 
-export default function ResetPassword() {
+function ResetPasswordForm() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [token, setToken] = useState('');
@@ -70,7 +70,7 @@ export default function ResetPassword() {
       setTimeout(() => {
         router.push('/signin');
       }, 2000);
-    } catch (err: any) {
+    } catch ($1: unknown) {
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -144,3 +144,12 @@ export default function ResetPassword() {
     </div>
   );
 }
+
+export default function ResetPassword() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center min-h-screen">Загрузка...</div>}>
+      <ResetPasswordForm />
+    </Suspense>
+  );
+}
+

@@ -111,3 +111,4 @@ const BusinessSchema = new mongoose.Schema(
 
 export default mongoose.models.Business ||
   mongoose.model("Business", BusinessSchema);
+

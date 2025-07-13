@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useState, useEffect, useCallback } from 'react';
 import { formatDate } from '@/lib/utils/date-utils';
 
 interface Client {
@@ -37,11 +36,7 @@ export default function ClientsPage() {
   const pageSize = 20;
   
   // Fetch clients
-  useEffect(() => {
-    fetchClients();
-  }, [searchQuery, currentPage]);
-  
-  async function fetchClients() {
+  const fetchClients = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     
@@ -63,13 +58,17 @@ export default function ClientsPage() {
       setClients(data.clients || []);
       setTotalPages(data.totalPages || 1);
       setTotalClients(data.total || 0);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error fetching clients:', error);
-      setError(error.message);
+      setError(error instanceof Error ? error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" : 'An error occurred');
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [searchQuery, currentPage]);
+
+  useEffect(() => {
+    fetchClients();
+  }, [fetchClients]);
   
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     setSearchQuery(e.target.value);
@@ -118,9 +117,9 @@ export default function ClientsPage() {
       // Refresh clients list
       await fetchClients();
       handleModalClose();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating client:', error);
-      alert(error.message);
+      alert(error instanceof Error ? error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" : 'An error occurred');
     }
   }
   
@@ -386,3 +385,5 @@ export default function ClientsPage() {
     </div>
   );
 }
+
+

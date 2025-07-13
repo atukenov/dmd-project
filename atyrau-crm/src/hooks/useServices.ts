@@ -1,16 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useBusinessStore } from "@/store/businessStore";
-
-interface Service {
-  id: string;
-  name: string;
-  description: string;
-  duration: number;
-  price: number;
-  category: string;
-  image: string | null;
-  isActive: boolean;
-}
+import { Service } from "@/types/models";
 
 interface UseServicesResult {
   services: Service[];
@@ -30,7 +20,7 @@ export function useServices(): UseServicesResult {
   const [error, setError] = useState<string | null>(null);
 
   // Function to fetch services
-  const fetchServices = async () => {
+  const fetchServices = useCallback(async () => {
     if (!businessId) {
       setError("No business ID available");
       setLoading(false);
@@ -55,12 +45,12 @@ export function useServices(): UseServicesResult {
     } finally {
       setLoading(false);
     }
-  };
+  }, [businessId]);
 
   // Fetch services when businessId changes
   useEffect(() => {
     fetchServices();
-  }, [businessId]);
+  }, [fetchServices]);
 
   return {
     services,
@@ -69,3 +59,4 @@ export function useServices(): UseServicesResult {
     refetch: fetchServices,
   };
 }
+

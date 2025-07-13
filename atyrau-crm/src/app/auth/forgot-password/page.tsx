@@ -68,10 +68,10 @@ export default function ForgotPasswordPage() {
       
       // On success, show the message
       setIsSubmitted(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
       setErrors(prev => ({
         ...prev,
-        general: error.message || 'Произошла ошибка',
+        general: error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : 'Произошла ошибка',
       }));
     } finally {
       setIsLoading(false);
@@ -137,3 +137,5 @@ export default function ForgotPasswordPage() {
     </div>
   );
 }
+
+

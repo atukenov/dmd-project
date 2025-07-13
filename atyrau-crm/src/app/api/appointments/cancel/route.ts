@@ -113,11 +113,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       message: "Appointment cancelled successfully",
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error cancelling appointment:", error);
     return NextResponse.json(
-      { message: "Failed to cancel appointment", error: error.message },
+      { message: "Failed to cancel appointment", error: error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" },
       { status: 500 }
     );
   }
 }
+
+

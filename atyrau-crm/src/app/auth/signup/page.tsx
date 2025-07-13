@@ -114,10 +114,10 @@ export default function SignupPage() {
       
       // On successful registration, redirect to verification page
       router.push('/auth/verify-email?email=' + encodeURIComponent(formValues.email));
-    } catch (error: any) {
+    } catch (error: unknown) {
       setErrors(prev => ({
         ...prev,
-        general: error.message || 'Произошла ошибка при регистрации',
+        general: error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : 'Произошла ошибка при регистрации',
       }));
     } finally {
       setIsLoading(false);
@@ -234,3 +234,5 @@ export default function SignupPage() {
     </div>
   );
 }
+
+

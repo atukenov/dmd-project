@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useBusinessStore } from "@/store/businessStore";
 import { useServices } from "./useServices";
+import { Service } from "@/types/models";
 
 interface AppointmentFormData {
   serviceId: string;
@@ -13,10 +14,10 @@ interface AppointmentFormData {
 }
 
 interface UseAppointmentsResult {
-  services: any[]; // Services from the useServices hook
+  services: Service[]; // Services from the useServices hook
   servicesLoading: boolean;
   servicesError: string | null;
-  createAppointment: (data: AppointmentFormData) => Promise<any>;
+  createAppointment: (data: AppointmentFormData) => Promise<unknown>;
   isCreating: boolean;
   createError: string | null;
 }
@@ -83,3 +84,4 @@ export function useAppointments(): UseAppointmentsResult {
     createError,
   };
 }
+

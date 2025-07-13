@@ -5,7 +5,6 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { findOne } from "@/lib/db";
 import { getServerSession } from "next-auth";
-import { users } from "./mock/data";
 
 // Define a function to create the adapter only when MongoDB is available
 const getMongoDBAdapter = () => {
@@ -13,8 +12,8 @@ const getMongoDBAdapter = () => {
     if (process.env.NODE_ENV === "development") {
       return undefined; // Skip adapter in development for easier testing
     }
-    return MongoDBAdapter(clientPromise) as any;
-  } catch (error) {
+    return MongoDBAdapter(clientPromise);
+  } catch {
     console.warn("Failed to create MongoDB adapter. Using JWT only.");
     return undefined;
   }
@@ -112,3 +111,4 @@ export const authOptions: NextAuthOptions = {
 export const auth = async () => {
   return await getServerSession(authOptions);
 };
+

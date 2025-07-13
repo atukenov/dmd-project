@@ -33,7 +33,7 @@ export default function ForgotPassword() {
 
       setMessage(data.message);
       setEmail('');
-    } catch (err: any) {
+    } catch ($1: unknown) {
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -95,3 +95,4 @@ export default function ForgotPassword() {
     </div>
   );
 }
+
