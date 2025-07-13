@@ -35,6 +35,7 @@ export default function AppointmentsPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [showNewAppointmentForm, setShowNewAppointmentForm] = useState<boolean>(false);
+  const [isUpdatingAppointment, setIsUpdatingAppointment] = useState<boolean>(false);
   const [newAppointmentData, setNewAppointmentData] = useState({
     serviceId: '',
     startTime: `${selectedDate.toISOString().split('T')[0]}T09:00`,
@@ -78,6 +79,7 @@ export default function AppointmentsPage() {
   // Handle status change
   const handleStatusChange = async (appointmentId: string, newStatus: string) => {
     try {
+      setIsUpdatingAppointment(true);
       const response = await fetch('/api/appointments/update', {
         method: 'PATCH',
         headers: {
@@ -93,27 +95,25 @@ export default function AppointmentsPage() {
         throw new Error('Failed to update appointment status');
       }
       
-      // Refresh appointments list
-      const updatedAppointments = appointments.map(appointment => {
-        if (appointment._id === appointmentId) {
-          return { 
-            ...appointment, 
-            status: newStatus as Appointment['status']
-          };
-        }
-        return appointment;
-      });
+      // Refresh appointments from server to ensure consistency
+      await fetchAppointments();
       
-      setAppointments(updatedAppointments);
+      // Update selected appointment if it's the one being updated
+      if (selectedAppointment && selectedAppointment._id === appointmentId) {
+        setSelectedAppointment(prev => prev ? { ...prev, status: newStatus as Appointment['status'] } : null);
+      }
     } catch (error) {
       console.error('Error updating appointment:', error);
       alert(`Failed to update appointment: ${error instanceof Error ? error.message : 'An error occurred'}`);
+    } finally {
+      setIsUpdatingAppointment(false);
     }
   };
 
   // Handle payment status change
   const handlePaymentStatusChange = async (appointmentId: string, newPaymentStatus: string) => {
     try {
+      setIsUpdatingAppointment(true);
       const response = await fetch('/api/appointments/update', {
         method: 'PATCH',
         headers: {
@@ -129,27 +129,25 @@ export default function AppointmentsPage() {
         throw new Error('Failed to update payment status');
       }
       
-      // Refresh appointments list
-      const updatedAppointments = appointments.map(appointment => {
-        if (appointment._id === appointmentId) {
-          return { 
-            ...appointment, 
-            paymentStatus: newPaymentStatus as Appointment['paymentStatus']
-          };
-        }
-        return appointment;
-      });
+      // Refresh appointments from server to ensure consistency
+      await fetchAppointments();
       
-      setAppointments(updatedAppointments);
+      // Update selected appointment if it's the one being updated
+      if (selectedAppointment && selectedAppointment._id === appointmentId) {
+        setSelectedAppointment(prev => prev ? { ...prev, paymentStatus: newPaymentStatus as Appointment['paymentStatus'] } : null);
+      }
     } catch (error) {
       console.error('Error updating payment status:', error);
       alert(`Failed to update payment status: ${error instanceof Error ? error.message : 'An error occurred'}`);
+    } finally {
+      setIsUpdatingAppointment(false);
     }
   };
 
   // Handle appointment cancellation
   const handleCancelAppointment = async (appointmentId: string, reason: string) => {
     try {
+      setIsUpdatingAppointment(true);
       const response = await fetch('/api/appointments/cancel', {
         method: 'POST',
         headers: {
@@ -165,22 +163,16 @@ export default function AppointmentsPage() {
         throw new Error('Failed to cancel appointment');
       }
       
-      // Refresh appointments list
-      const updatedAppointments = appointments.map(appointment => {
-        if (appointment._id === appointmentId) {
-          return { 
-            ...appointment, 
-            status: 'cancelled' as Appointment['status']
-          };
-        }
-        return appointment;
-      });
+      // Refresh appointments from server to ensure consistency
+      await fetchAppointments();
       
-      setAppointments(updatedAppointments);
+      // Close the modal since appointment is cancelled
       setSelectedAppointment(null);
     } catch (error) {
       console.error('Error cancelling appointment:', error);
       alert(`Failed to cancel appointment: ${error instanceof Error ? error.message : 'An error occurred'}`);
+    } finally {
+      setIsUpdatingAppointment(false);
     }
   };
 
@@ -642,13 +634,16 @@ export default function AppointmentsPage() {
                   className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
                   value={selectedAppointment.status}
                   onChange={(e) => handleStatusChange(selectedAppointment._id, e.target.value)}
-                  disabled={selectedAppointment.status === 'cancelled'}
+                  disabled={selectedAppointment.status === 'cancelled' || isUpdatingAppointment}
                 >
                   <option value="scheduled">Запланировано</option>
                   <option value="completed">Завершено</option>
                   <option value="no-show">Не явился</option>
                   <option value="cancelled" disabled>Отменено</option>
                 </select>
+                {isUpdatingAppointment && (
+                  <p className="text-xs text-blue-500 mt-1">Обновление...</p>
+                )}
               </div>
               
               <div>
@@ -657,12 +652,15 @@ export default function AppointmentsPage() {
                   className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
                   value={selectedAppointment.paymentStatus}
                   onChange={(e) => handlePaymentStatusChange(selectedAppointment._id, e.target.value)}
-                  disabled={selectedAppointment.status === 'cancelled'}
+                  disabled={selectedAppointment.status === 'cancelled' || isUpdatingAppointment}
                 >
                   <option value="pending">Ожидает оплаты</option>
                   <option value="paid">Оплачено</option>
                   <option value="refunded">Возмещено</option>
                 </select>
+                {isUpdatingAppointment && (
+                  <p className="text-xs text-blue-500 mt-1">Обновление...</p>
+                )}
               </div>
               
               {selectedAppointment.status !== 'cancelled' && (
@@ -676,13 +674,14 @@ export default function AppointmentsPage() {
                       id="cancellationReason"
                     />
                     <button
-                      className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                      className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50"
+                      disabled={isUpdatingAppointment}
                       onClick={() => {
                         const reason = (document.getElementById('cancellationReason') as HTMLInputElement).value;
                         handleCancelAppointment(selectedAppointment._id, reason);
                       }}
                     >
-                      Отменить
+                      {isUpdatingAppointment ? 'Отмена...' : 'Отменить'}
                     </button>
                   </div>
                 </div>
