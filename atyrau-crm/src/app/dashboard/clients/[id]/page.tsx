@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { formatDate } from '@/lib/utils/date-utils';
 import Link from 'next/link';
 
@@ -36,12 +36,14 @@ interface ClientNote {
 }
 
 interface ClientDetailPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function ClientDetailPage({ params }: ClientDetailPageProps) {
+  const resolvedParams = use(params);
+  const clientId = resolvedParams.id;
   const [client, setClient] = useState<ClientDetails | null>(null);
   const [appointments, setAppointments] = useState<ClientAppointment[]>([]);
   const [notes, setNotes] = useState<ClientNote[]>([]);
@@ -63,15 +65,46 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
   
   // Fetch client details
   useEffect(() => {
-    fetchClientDetails();
-  }, [params.id]);
+    async function loadClientDetails() {
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        const response = await fetch(`/api/clients/${clientId}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch client details');
+        }
+        
+        const data = await response.json();
+        setClient(data.client);
+        setAppointments(data.appointments || []);
+        setNotes(data.notes || []);
+        
+        // Prepare form data for editing
+        setFormData({
+          name: data.client.name,
+          phone: data.client.phone,
+          email: data.client.email || '',
+          notes: data.client.notes || ''
+        });
+      } catch (error) {
+        console.error('Error fetching client details:', error);
+        setError(error instanceof Error ? error.message : 'An error occurred');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    loadClientDetails();
+  }, [clientId]);
   
   async function fetchClientDetails() {
     setIsLoading(true);
     setError(null);
     
     try {
-      const response = await fetch(`/api/clients/${params.id}`);
+      const response = await fetch(`/api/clients/${clientId}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch client details');
@@ -89,9 +122,9 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
         email: data.client.email || '',
         notes: data.client.notes || ''
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error fetching client details:', error);
-      setError(error.message);
+      setError(error instanceof Error ? error.message : 'An error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -134,7 +167,7 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
     e.preventDefault();
     
     try {
-      const response = await fetch(`/api/clients/${params.id}`, {
+      const response = await fetch(`/api/clients/${clientId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'
@@ -150,9 +183,9 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
       // Refresh client details
       await fetchClientDetails();
       handleModalClose();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating client:', error);
-      alert(error.message);
+      alert(error instanceof Error ? error.message : 'An error occurred');
     }
   }
   
@@ -160,7 +193,7 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
     e.preventDefault();
     
     try {
-      const response = await fetch(`/api/clients/${params.id}/notes`, {
+      const response = await fetch(`/api/clients/${clientId}/notes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -177,9 +210,9 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
       await fetchClientDetails();
       handleModalClose();
       setActiveTab('notes'); // Switch to notes tab
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error adding note:', error);
-      alert(error.message);
+      alert(error instanceof Error ? error.message : 'An error occurred');
     }
   }
   
@@ -286,7 +319,7 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-2xl font-bold">{client.name}</h1>
+              <h1 className="text-2xl font-bold text-gray-700">{client.name}</h1>
               <p className="text-gray-600">Клиент с {formatDate(new Date(client.createdAt))}</p>
             </div>
             <button
@@ -299,10 +332,11 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
             <div>
-              <h2 className="text-lg font-semibold mb-3">Контактная информация</h2>
+              <h2 className="text-lg font-semibold mb-3 text-gray-700">Контактная информация</h2>
               <div className="space-y-2">
                 <p>
-                  <span className="font-medium">Телефон:</span> {client.phone}
+                  <span className="font-medium text-gray-800 mr-3">Телефон:</span> 
+                  <span className='text-gray-600'>{client.phone}</span>
                 </p>
                 {client.email && (
                   <p>
@@ -315,7 +349,7 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
             <div>
               {client.notes && (
                 <>
-                  <h2 className="text-lg font-semibold mb-3">Заметки о клиенте</h2>
+                  <h2 className="text-lg font-semibold mb-3 text-gray-700">Заметки о клиенте</h2>
                   <div className="bg-gray-50 p-3 rounded">
                     {client.notes}
                   </div>
@@ -351,7 +385,7 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
         {activeTab === 'appointments' && (
           <div className="p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">История записей</h2>
+              <h2 className="text-lg font-semibold text-gray-700">История записей</h2>
               <Link
                 href={`/dashboard/appointments?client=${client._id}`}
                 className="text-blue-600 hover:underline"
@@ -373,7 +407,7 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
                   >
                     <div className="flex justify-between">
                       <div>
-                        <div className="font-medium">
+                        <div className="font-medium text-gray-500">
                           {formatDate(new Date(appointment.startTime))} · {formatTimeDisplay(appointment.startTime)} - {formatTimeDisplay(appointment.endTime)}
                         </div>
                         
@@ -415,7 +449,7 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
         {activeTab === 'notes' && (
           <div className="p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Заметки о клиенте</h2>
+              <h2 className="text-lg font-semibold text-gray-700">Заметки о клиенте</h2>
               <button
                 onClick={handleAddNoteModalOpen}
                 className="text-blue-600 hover:underline"
@@ -426,7 +460,7 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
             
             {notes.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                Нет заметок о клиенте. Нажмите "Добавить заметку", чтобы создать первую.
+                Нет заметок о клиенте. Нажмите &quot;Добавить заметку&quot;, чтобы создать первую.
               </div>
             ) : (
               <div className="space-y-4">
@@ -461,7 +495,7 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
       {showEditModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h2 className="text-xl font-bold mb-4">
+            <h2 className="text-xl font-bold mb-4 text-gray-700">
               Редактировать клиента
             </h2>
             
@@ -477,7 +511,7 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
                   value={formData.name}
                   onChange={handleFormChange}
                   required
-                  className="w-full p-2 border border-gray-300 rounded-md"
+                  className="w-full p-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
@@ -492,7 +526,7 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
                   value={formData.phone}
                   onChange={handleFormChange}
                   required
-                  className="w-full p-2 border border-gray-300 rounded-md"
+                  className="w-full p-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
@@ -506,7 +540,7 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
                   name="email"
                   value={formData.email}
                   onChange={handleFormChange}
-                  className="w-full p-2 border border-gray-300 rounded-md"
+                  className="w-full p-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
@@ -520,7 +554,7 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
                   value={formData.notes}
                   onChange={handleFormChange}
                   rows={3}
-                  className="w-full p-2 border border-gray-300 rounded-md"
+                  className="w-full p-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
