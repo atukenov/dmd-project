@@ -1,114 +1,61 @@
-import { NextRequest, NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb";
-import { getToken } from "next-auth/jwt";
-import { ObjectId } from "mongodb";
+import { NextRequest } from "next/server";
+import { AuthService, ApiResponseService, ClientService } from "@/lib/services";
+import { validateClientData } from "@/lib/utils/validation.utils";
 
 export async function POST(request: NextRequest) {
-  try {
-    // Get client data from request body
-    const body = await request.json();
-    const { name, phone, email, notes, businessId } = body;
+  // Get and validate client data from request body
+  const body = await request.json();
+  const { name, phone, email, notes, businessId } = body;
 
-    // Validate required fields
-    if (!name || !phone) {
-      return NextResponse.json(
-        { message: "Name and phone are required" },
-        { status: 400 }
-      );
-    }
+  // Validate required fields
+  const validation = validateClientData({ name, phone, email, notes });
+  if (!validation.isValid) {
+    return ApiResponseService.validationError(validation.errors);
+  }
 
-    // Connect to MongoDB
-    const client = await clientPromise;
-    const db = client.db();
+  // Authenticate user
+  const authResult = await AuthService.authenticateRequest(request);
+  if (!authResult.success || !authResult.user) {
+    return authResult.error === "unauthorized"
+      ? ApiResponseService.unauthorized("Authentication required")
+      : ApiResponseService.error("Authentication failed");
+  }
 
-    // Verify user is authorized
-    const token = await getToken({ req: request });
+  const { user } = authResult;
 
-    if (!token) {
-      return NextResponse.json(
-        { message: "Authentication required" },
-        { status: 401 }
-      );
-    }
+  // Get target business ID
+  const targetBusinessId =
+    businessId || (await AuthService.getBusinessIdForUser(user._id));
+  if (!targetBusinessId) {
+    return ApiResponseService.validationError(["Business ID is required"]);
+  }
 
-    // Get business ID from token if not provided in body
-    let targetBusinessId = businessId;
-
-    if (!targetBusinessId) {
-      const user = await db
-        .collection("users")
-        .findOne({ _id: new ObjectId(token.sub) });
-
-      if (user?.businessId) {
-        targetBusinessId = user.businessId.toString();
-      } else {
-        return NextResponse.json(
-          { message: "Business ID is required" },
-          { status: 400 }
-        );
-      }
-    } else {
-      // If businessId is provided, check if user has permission
-      const user = await db
-        .collection("users")
-        .findOne({ _id: new ObjectId(token.sub) });
-
-      const canAccess =
-        token.role === "admin" ||
-        (user?.businessId && user.businessId.toString() === targetBusinessId);
-
-      if (!canAccess) {
-        return NextResponse.json(
-          {
-            message:
-              "You do not have permission to add clients to this business",
-          },
-          { status: 403 }
-        );
-      }
-    }
-
-    // Check if client with same phone already exists
-    const existingClient = await db.collection("clients").findOne({
-      businessId: new ObjectId(targetBusinessId),
-      phone,
-    });
-
-    if (existingClient) {
-      return NextResponse.json(
-        { message: "A client with this phone number already exists" },
-        { status: 409 }
-      );
-    }
-
-    // Create new client
-    const newClient = {
-      businessId: new ObjectId(targetBusinessId),
-      name,
-      phone,
-      email: email || null,
-      notes: notes || "",
-      createdAt: new Date(),
-      createdBy: new ObjectId(token.sub),
-    };
-
-    const result = await db.collection("clients").insertOne(newClient);
-
-    return NextResponse.json({
-      message: "Client created successfully",
-      clientId: result.insertedId,
-      client: {
-        ...newClient,
-        _id: result.insertedId,
-      },
-    });
-  } catch (error) {
-    console.error("Error creating client:", error);
-    return NextResponse.json(
-      { message: "Failed to create client", error: error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" },
-      { status: 500 }
+  // Verify business ownership/access
+  const hasAccess = await AuthService.verifyBusinessOwnership(
+    user,
+    targetBusinessId
+  );
+  if (!hasAccess) {
+    return ApiResponseService.error(
+      "You do not have permission to add clients to this business",
+      403
     );
   }
+
+  // Create client using ClientService
+  const clientResult = await ClientService.createClient(targetBusinessId, {
+    name,
+    phone,
+    email: email || null,
+    notes: notes || "",
+    createdBy: user._id.toString(),
+  });
+
+  if (!clientResult.success) {
+    return ApiResponseService.error(
+      clientResult.error || "Failed to create client"
+    );
+  }
+
+  return ApiResponseService.success(clientResult.data);
 }
-
-

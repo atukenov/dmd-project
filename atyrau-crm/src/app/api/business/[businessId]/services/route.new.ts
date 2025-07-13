@@ -11,7 +11,9 @@ export async function GET(
 ) {
   const authResult = await AuthService.authenticateRequest(request);
   if (!authResult.success || !authResult.user) {
-    return ApiResponseService.unauthorized(authResult.error || "Authentication required");
+    return ApiResponseService.unauthorized(
+      authResult.error || "Authentication required"
+    );
   }
 
   const params = await context.params;
@@ -39,7 +41,9 @@ export async function POST(
 ) {
   const authResult = await AuthService.authenticateRequest(request);
   if (!authResult.success || !authResult.user) {
-    return ApiResponseService.unauthorized(authResult.error || "Authentication required");
+    return ApiResponseService.unauthorized(
+      authResult.error || "Authentication required"
+    );
   }
 
   const params = await context.params;

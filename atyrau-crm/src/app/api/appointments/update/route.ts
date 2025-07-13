@@ -1,113 +1,72 @@
-import { NextRequest, NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb";
-import { getToken } from "next-auth/jwt";
-import { ObjectId } from "mongodb";
+import { NextRequest } from "next/server";
+import {
+  AuthService,
+
+  ApiResponseService,
+  BusinessService,
+} from "@/lib/services";
+import { validateAppointmentUpdateData } from "@/lib/utils/validation.utils";
 
 export async function PATCH(request: NextRequest) {
-  try {
+  
     // Get appointment data from request body
     const body = await request.json();
     const { appointmentId, status, paymentStatus, notes } = body;
 
-    if (!appointmentId) {
-      return NextResponse.json(
-        { message: "Appointment ID is required" },
-        { status: 400 }
-      );
-    }
-
-    // Connect to MongoDB
-    const client = await clientPromise;
-    const db = client.db();
-
-    // Verify user is authorized
-    const token = await getToken({ req: request });
-
-    if (!token) {
-      return NextResponse.json(
-        { message: "Authentication required" },
-        { status: 401 }
-      );
-    }
-
-    // Get the appointment
-    const appointment = await db.collection("appointments").findOne({
-      _id: new ObjectId(appointmentId),
+    // Validate input data
+    const validation = validateAppointmentUpdateData({
+      appointmentId,
+      status,
+      paymentStatus,
+      notes,
     });
-
-    if (!appointment) {
-      return NextResponse.json(
-        { message: "Appointment not found" },
-        { status: 404 }
-      );
+    if (!validation.isValid) {
+      return ApiResponseService.validationError(validation.errors);
     }
 
-    // Check if user has permission to update this appointment
-    const user = await db
-      .collection("users")
-      .findOne({ _id: new ObjectId(token.sub) });
-
-    const canAccess =
-      token.role === "admin" ||
-      (user?.businessId &&
-        user.businessId.toString() === appointment.businessId.toString());
-
-    if (!canAccess) {
-      return NextResponse.json(
-        { message: "You do not have permission to update this appointment" },
-        { status: 403 }
-      );
+    // Authenticate user
+    const authResult = await AuthService.authenticateRequest(request);
+    if (!authResult.success || !authResult.user) {
+      return ApiResponseService.unauthorized("Authentication required");
     }
 
-    // Build update object
-    interface UpdateData {
-      updatedAt: Date;
-      status?: string;
-      paymentStatus?: string;
-      notes?: string;
-    }
+    const { user } = authResult;
 
-    const updateData: UpdateData = { updatedAt: new Date() };
-
-    if (status) {
-      updateData.status = status;
-    }
-
-    if (paymentStatus) {
-      updateData.paymentStatus = paymentStatus;
-    }
-
-    if (notes !== undefined) {
-      updateData.notes = notes;
-    }
-
-    // Update appointment
-    await db
-      .collection("appointments")
-      .updateOne({ _id: new ObjectId(appointmentId) }, { $set: updateData });
-
-    // Return updated appointment
-    const updatedAppointment = await db.collection("appointments").findOne({
-      _id: new ObjectId(appointmentId),
-    });
-
-    return NextResponse.json({
-      message: "Appointment updated successfully",
-      appointment: updatedAppointment,
-    });
-  } catch (error) {
-    console.error("Error updating appointment:", error);
-    const errorMessage =
-      error instanceof Error
-        ? error instanceof Error
-          ? error instanceof Error
-            ? error.message
-            : "Unknown error"
-          : "Unknown error"
-        : "Unknown error";
-    return NextResponse.json(
-      { message: "Failed to update appointment", error: errorMessage },
-      { status: 500 }
+    // Update appointment (this will also verify business ownership)
+    const updateResult = await BusinessService.updateAppointment(
+      appointmentId,
+      {
+        status,
+        paymentStatus,
+        notes,
+      }
     );
-  }
+
+    if (!updateResult.success || !updateResult.data) {
+      return ApiResponseService.error(
+        updateResult.error || "Failed to update appointment",
+        404
+      );
+    }
+
+    const { appointment, businessId } = updateResult.data;
+
+    // Verify user has permission to update this appointment
+    const hasAccess = await AuthService.verifyBusinessOwnership(
+      user,
+      businessId
+    );
+    if (!hasAccess) {
+      return ApiResponseService.error(
+        "You do not have permission to update this appointment",
+        403
+      );
+    }
+
+    return ApiResponseService.success({
+      message: "Appointment updated successfully",
+      appointment,
+    });
+  });
 }
+

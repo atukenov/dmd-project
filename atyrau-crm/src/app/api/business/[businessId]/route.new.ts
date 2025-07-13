@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
-import { 
-  AuthService, 
-  ApiResponseService, 
-  BusinessProfileService
+import {
+  AuthService,
+  ApiResponseService,
+  BusinessProfileService,
 } from "@/lib/services";
 
 export async function GET(
@@ -11,7 +11,9 @@ export async function GET(
 ) {
   const authResult = await AuthService.authenticateRequest(request);
   if (!authResult.success || !authResult.user) {
-    return ApiResponseService.unauthorized(authResult.error || "Authentication required");
+    return ApiResponseService.unauthorized(
+      authResult.error || "Authentication required"
+    );
   }
 
   const result = await BusinessProfileService.getBusinessProfile(
@@ -32,7 +34,9 @@ export async function PUT(
 ) {
   const authResult = await AuthService.authenticateRequest(request);
   if (!authResult.success || !authResult.user) {
-    return ApiResponseService.unauthorized(authResult.error || "Authentication required");
+    return ApiResponseService.unauthorized(
+      authResult.error || "Authentication required"
+    );
   }
 
   const businessData = await request.json();
@@ -56,7 +60,9 @@ export async function DELETE(
 ) {
   const authResult = await AuthService.authenticateRequest(request);
   if (!authResult.success || !authResult.user) {
-    return ApiResponseService.unauthorized(authResult.error || "Authentication required");
+    return ApiResponseService.unauthorized(
+      authResult.error || "Authentication required"
+    );
   }
 
   const result = await BusinessProfileService.deleteBusinessProfile(
