@@ -66,7 +66,7 @@ export async function PATCH(request: NextRequest) {
       paymentStatus?: string;
       notes?: string;
     }
-    
+
     const updateData: UpdateData = { updatedAt: new Date() };
 
     if (status) {
@@ -97,12 +97,17 @@ export async function PATCH(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error updating appointment:", error);
-    const errorMessage = error instanceof Error ? error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" : "Unknown error";
+    const errorMessage =
+      error instanceof Error
+        ? error instanceof Error
+          ? error instanceof Error
+            ? error.message
+            : "Unknown error"
+          : "Unknown error"
+        : "Unknown error";
     return NextResponse.json(
       { message: "Failed to update appointment", error: errorMessage },
       { status: 500 }
     );
   }
 }
-
-

@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
         phone?: { $regex: string; $options: string };
       }>;
     }
-    
+
     const filter: ClientFilter = {};
 
     if (targetBusinessId) {
@@ -159,12 +159,17 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error fetching clients:", error);
-    const errorMessage = error instanceof Error ? error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" : "Unknown error";
+    const errorMessage =
+      error instanceof Error
+        ? error instanceof Error
+          ? error instanceof Error
+            ? error.message
+            : "Unknown error"
+          : "Unknown error"
+        : "Unknown error";
     return NextResponse.json(
       { message: "Failed to fetch clients", error: errorMessage },
       { status: 500 }
     );
   }
 }
-
-

@@ -59,4 +59,3 @@ export function useServices(): UseServicesResult {
     refetch: fetchServices,
   };
 }
-

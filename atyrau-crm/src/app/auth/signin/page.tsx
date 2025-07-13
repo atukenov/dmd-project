@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { FormField } from '@/components/molecules/FormField';
@@ -20,7 +20,6 @@ interface FormErrors {
 }
 
 function SigninPageForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams?.get('callbackUrl') || '/dashboard';
   const [isLoading, setIsLoading] = useState(false);
@@ -67,13 +66,17 @@ function SigninPageForm() {
         redirect: false,
         email: formValues.email,
         password: formValues.password,
+        callbackUrl: callbackUrl,
       });
       
       if (result?.error) {
         throw new Error('Неверный email или пароль');
       }
       
-      router.push(callbackUrl);
+      // Force a hard redirect after successful authentication
+      if (result?.ok) {
+        window.location.href = callbackUrl;
+      }
     } catch (error: unknown) {
       setErrors(prev => ({
         ...prev,

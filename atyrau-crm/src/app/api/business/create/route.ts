@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
         category?: string;
         image?: string;
       }
-      
+
       const servicesWithBusinessId: Service[] = businessData.services.map(
         (service: ServiceInput) => ({
           businessId: businessId.toString(),
@@ -152,4 +152,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

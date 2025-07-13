@@ -9,10 +9,11 @@ import { getServerSession } from "next-auth";
 // Define a function to create the adapter only when MongoDB is available
 const getMongoDBAdapter = () => {
   try {
-    if (process.env.NODE_ENV === "development") {
-      return undefined; // Skip adapter in development for easier testing
+    // Only use MongoDB adapter if explicitly configured, otherwise use JWT
+    if (process.env.MONGODB_URI && process.env.NODE_ENV === "production") {
+      return MongoDBAdapter(clientPromise);
     }
-    return MongoDBAdapter(clientPromise);
+    return undefined; // Use JWT strategy
   } catch {
     console.warn("Failed to create MongoDB adapter. Using JWT only.");
     return undefined;
@@ -83,6 +84,7 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   pages: {
     signIn: "/auth/signin",
@@ -92,6 +94,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role || "client";
+        token.emailVerified = user.emailVerified;
       }
       return token;
     },
@@ -102,13 +105,27 @@ export const authOptions: NextAuthOptions = {
       if (token.role) {
         session.user.role = token.role as string;
       }
+      if (token.emailVerified) {
+        session.user.emailVerified = token.emailVerified as Date;
+      }
       return session;
     },
+    async redirect({ url, baseUrl }) {
+      // Always redirect to dashboard after successful signin
+      if (url.includes("/auth/signin")) {
+        return `${baseUrl}/dashboard`;
+      }
+      // Allow relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // Allow callback URLs on the same origin
+      if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
+    },
   },
+  debug: process.env.NODE_ENV === "development",
 };
 
 // Export an auth function that can be used in server components
 export const auth = async () => {
   return await getServerSession(authOptions);
 };
-
