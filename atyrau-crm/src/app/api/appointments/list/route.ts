@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     // Verify user is authorized to view appointments for this business
     const token = await getToken({ req: request });
 
-    if (!token) {
+    if (!token || !token.sub) {
       return NextResponse.json(
         { message: "Authentication required" },
         { status: 401 }
@@ -30,12 +30,13 @@ export async function GET(request: NextRequest) {
     let targetBusinessId = businessId;
 
     if (!targetBusinessId) {
-      const user = await db
-        .collection("users")
-        .findOne({ _id: new ObjectId(token.sub) });
+      // If no businessId provided, try to find user's business
+      const business = await db
+        .collection("businesses")
+        .findOne({ userId: token.sub });
 
-      if (user?.businessId) {
-        targetBusinessId = user.businessId.toString();
+      if (business) {
+        targetBusinessId = business._id.toString();
       } else if (token.role !== "admin") {
         return NextResponse.json(
           { message: "You do not have permission to access this resource" },
@@ -43,16 +44,29 @@ export async function GET(request: NextRequest) {
         );
       }
     } else {
-      // If businessId is provided, check if user has permission to view it
-      const user = await db
-        .collection("users")
-        .findOne({ _id: new ObjectId(token.sub) });
+      // If businessId is provided, check if user has permission to access it
+      const userRole = token.role as string;
+      
+      // Admin can access any business
+      if (userRole === "admin") {
+        // Allow admin access
+      } else if (userRole === "business") {
+        // Business users can only access their own business
+        const business = await db
+          .collection("businesses")
+          .findOne({ 
+            _id: new ObjectId(targetBusinessId),
+            userId: token.sub 
+          });
 
-      const canAccess =
-        token.role === "admin" ||
-        (user?.businessId && user.businessId.toString() === targetBusinessId);
-
-      if (!canAccess) {
+        if (!business) {
+          return NextResponse.json(
+            { message: "You do not have permission to access this resource" },
+            { status: 403 }
+          );
+        }
+      } else {
+        // Clients and other roles cannot access business data
         return NextResponse.json(
           { message: "You do not have permission to access this resource" },
           { status: 403 }
@@ -62,7 +76,7 @@ export async function GET(request: NextRequest) {
 
     // Build query filter
     interface AppointmentFilter {
-      businessId?: ObjectId;
+      businessId?: string;
       startTime?: {
         $gte?: Date;
         $lte?: Date;
@@ -73,7 +87,7 @@ export async function GET(request: NextRequest) {
     const filter: AppointmentFilter = {};
 
     if (targetBusinessId) {
-      filter.businessId = new ObjectId(targetBusinessId);
+      filter.businessId = targetBusinessId; // Store as string, not ObjectId
     }
 
     // Date range filter

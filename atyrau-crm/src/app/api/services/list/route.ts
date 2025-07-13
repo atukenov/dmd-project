@@ -13,71 +13,79 @@ export async function GET(request: NextRequest) {
     const client = await clientPromise;
     const db = client.db();
 
-    // Verify user is authorized to view services for this business
+    // Verify user is authorized
     const token = await getToken({ req: request });
-    if (!token) {
+
+    if (!token || !token.sub) {
       return NextResponse.json(
         { message: "Authentication required" },
         { status: 401 }
       );
     }
 
+    // Get business ID from token if not provided in query
     let targetBusinessId = businessId;
-    let user;
 
-    // If no businessId provided, find the user first
     if (!targetBusinessId) {
-      user = await db
-        .collection("users")
-        .findOne({ _id: new ObjectId(token.sub) });
+      // If no businessId provided, try to find user's business
+      const business = await db
+        .collection("businesses")
+        .findOne({ userId: token.sub });
 
-      // Check if user has a businessId directly
-      if (user?.businessId) {
-        targetBusinessId = user.businessId.toString();
+      if (business) {
+        targetBusinessId = business._id.toString();
+      } else if (token.role !== "admin") {
+        return NextResponse.json(
+          { message: "You do not have permission to access this resource" },
+          { status: 403 }
+        );
       }
-      // If user doesn't have a businessId directly, check if they have a linked business
-      else {
-        // Find a business where this user is the owner
+    } else {
+      // If businessId is provided, check if user has permission to access it
+      const userRole = token.role as string;
+      
+      // Admin can access any business
+      if (userRole === "admin") {
+        // Allow admin access
+      } else if (userRole === "business") {
+        // Business users can only access their own business
         const business = await db
           .collection("businesses")
-          .findOne({ userId: new ObjectId(token.sub) });
+          .findOne({ 
+            _id: new ObjectId(targetBusinessId),
+            userId: token.sub 
+          });
 
-        if (business) {
-          targetBusinessId = business._id.toString();
-
-          // Optionally update the user with this business ID for future queries
-          await db
-            .collection("users")
-            .updateOne(
-              { _id: new ObjectId(token.sub) },
-              { $set: { businessId: business._id } }
-            );
+        if (!business) {
+          return NextResponse.json(
+            { message: "You do not have permission to access this resource" },
+            { status: 403 }
+          );
         }
+      } else {
+        // Clients and other roles cannot access business data
+        return NextResponse.json(
+          { message: "You do not have permission to access this resource" },
+          { status: 403 }
+        );
       }
     }
 
-    if (!targetBusinessId) {
-      // If we still don't have a businessId, check if the user is an admin and return all services
-      if (user?.role === "admin") {
-        const services = await db
-          .collection("services")
-          .find({})
-          .sort({ name: 1 })
-          .toArray();
+    // Build query filter
+    interface ServiceFilter {
+      businessId?: string;
+    }
 
-        return NextResponse.json({ services });
-      }
+    const filter: ServiceFilter = {};
 
-      return NextResponse.json(
-        { message: "No business associated with this user" },
-        { status: 400 }
-      );
+    if (targetBusinessId) {
+      filter.businessId = targetBusinessId; // Store as string, not ObjectId
     }
 
     // Get services for the business
     const services = await db
       .collection("services")
-      .find({ businessId: new ObjectId(targetBusinessId) })
+      .find(filter)
       .sort({ name: 1 })
       .toArray();
 
@@ -85,7 +93,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Error fetching services:", error);
     return NextResponse.json(
-      { message: "Failed to fetch services", error: error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" },
+      { message: "Failed to fetch services", error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }

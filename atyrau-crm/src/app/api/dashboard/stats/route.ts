@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import clientPromise from "@/lib/mongodb";
+import { ObjectId } from "mongodb";
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,16 +15,54 @@ export async function GET(request: NextRequest) {
     const client = await clientPromise;
     const db = client.db();
 
-    // Find the business associated with the user
-    const business = await db
-      .collection("businesses")
-      .findOne({ userId: token.sub });
+    // Get businessId from query parameters if provided
+    const searchParams = request.nextUrl.searchParams;
+    const businessId = searchParams.get("businessId");
 
-    if (!business) {
-      return NextResponse.json(
-        { message: "Business not found" },
-        { status: 404 }
-      );
+    let targetBusiness;
+
+    if (businessId) {
+      // If businessId is provided, check if user has permission to access it
+      const userRole = token.role as string;
+      
+      if (userRole === "admin") {
+        // Admin can access any business
+        targetBusiness = await db
+          .collection("businesses")
+          .findOne({ _id: new ObjectId(businessId) });
+      } else if (userRole === "business") {
+        // Business users can only access their own business
+        targetBusiness = await db
+          .collection("businesses")
+          .findOne({ 
+            _id: new ObjectId(businessId),
+            userId: token.sub 
+          });
+      } else {
+        return NextResponse.json(
+          { message: "You do not have permission to access this resource" },
+          { status: 403 }
+        );
+      }
+
+      if (!targetBusiness) {
+        return NextResponse.json(
+          { message: "Business not found or access denied" },
+          { status: 404 }
+        );
+      }
+    } else {
+      // Find the business associated with the user
+      targetBusiness = await db
+        .collection("businesses")
+        .findOne({ userId: token.sub });
+
+      if (!targetBusiness) {
+        return NextResponse.json(
+          { message: "Business not found" },
+          { status: 404 }
+        );
+      }
     }
 
     // Get today's date range
@@ -62,21 +101,21 @@ export async function GET(request: NextRequest) {
       await Promise.all([
         // Today's appointments count
         db.collection("appointments").countDocuments({
-          businessId: business._id,
+          businessId: targetBusiness._id,
           startTime: { $gte: startOfToday, $lte: endOfToday },
           status: { $nin: ["cancelled"] },
         }),
 
         // This week's appointments count
         db.collection("appointments").countDocuments({
-          businessId: business._id,
+          businessId: targetBusiness._id,
           startTime: { $gte: startOfWeek, $lte: endOfWeek },
           status: { $nin: ["cancelled"] },
         }),
 
         // Total clients count
         db.collection("clients").countDocuments({
-          businessId: business._id,
+          businessId: targetBusiness._id,
         }),
 
         // This month's revenue (completed appointments only)
@@ -85,7 +124,7 @@ export async function GET(request: NextRequest) {
           .aggregate([
             {
               $match: {
-                businessId: business._id,
+                businessId: targetBusiness._id,
                 startTime: { $gte: startOfMonth, $lte: endOfMonth },
                 status: "completed",
                 paymentStatus: "paid",
