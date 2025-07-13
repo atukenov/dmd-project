@@ -56,14 +56,27 @@ export async function GET(request: NextRequest) {
     const nextWeek = new Date();
     nextWeek.setDate(now.getDate() + 7);
 
+    console.log("Date range:", { now, nextWeek }); // Debug log
+
+    // First, let's check if we have any appointments at all for this business
+    const allAppointments = await db
+      .collection("appointments")
+      .find({ businessId: new ObjectId(targetBusiness._id) })
+      .limit(5)
+      .toArray();
+
+    console.log("All appointments for business:", allAppointments); // Debug log
+
     const recentAppointments = await db
       .collection("appointments")
       .aggregate([
         {
           $match: {
             businessId: new ObjectId(targetBusiness._id),
-            startTime: { $gte: now, $lte: nextWeek },
-            status: { $nin: ["cancelled"] },
+            // Remove strict date filtering for now to see all appointments
+            // startTime: { $gte: now, $lte: nextWeek },
+            // Remove status filtering to see all appointments
+            // status: { $nin: ["cancelled"] },
           },
         },
         {
@@ -83,10 +96,16 @@ export async function GET(request: NextRequest) {
           },
         },
         {
-          $unwind: "$client",
+          $addFields: {
+            client: { $arrayElemAt: ["$client", 0] },
+            service: { $arrayElemAt: ["$service", 0] },
+          },
         },
         {
-          $unwind: "$service",
+          $match: {
+            client: { $ne: null },
+            service: { $ne: null },
+          },
         },
         {
           $project: {
@@ -109,6 +128,8 @@ export async function GET(request: NextRequest) {
         },
       ])
       .toArray();
+
+    console.log("Filtered appointments:", recentAppointments); // Debug log
 
     return NextResponse.json(recentAppointments);
   } catch (error) {
