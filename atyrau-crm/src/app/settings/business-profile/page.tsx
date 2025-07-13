@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useBusinessStore } from '@/store/businessStore';
 import { Button } from '../../../components/atoms/Button';
 import { Card } from '../../../components/atoms/Card';
 import { Input } from '../../../components/atoms/Input';
@@ -23,8 +24,10 @@ type Step = 'info' | 'address' | 'services' | 'hours' | 'photos' | 'confirmation
 
 export default function BusinessProfileSetup() {
   const router = useRouter();
+  const { businessId } = useBusinessStore();
   const [currentStep, setCurrentStep] = useState<Step>('info');
   const [loading, setLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const [error, setError] = useState('');
   
   // Form data
@@ -64,7 +67,133 @@ export default function BusinessProfileSetup() {
     galleryImages: [],
   });
 
-  // Step navigation
+  // Load existing business data
+  useEffect(() => {
+    const loadBusinessData = async () => {
+
+      if (!businessId) {
+        setIsLoadingData(false);
+        return;
+      }
+
+      try {
+        setIsLoadingData(true);
+        const response = await fetch(`/api/business/${businessId}`);
+        
+        if (response.ok) {
+          const businessData = await response.json();
+          
+          // Populate form with existing data
+          if (businessData.info) {
+            setBusinessInfo({
+              name: businessData.info.name || '',
+              category: businessData.info.category || '',
+              description: businessData.info.description || '',
+              phone: businessData.info.phone || '',
+              email: businessData.info.email || '',
+            });
+          }
+          
+          if (businessData.address) {
+            setAddress({
+              street: businessData.address.street || '',
+              building: businessData.address.building || '',
+              city: businessData.address.city || 'Атырау',
+              postalCode: businessData.address.postalCode || '',
+              landmark: businessData.address.landmark || '',
+            });
+          }
+          
+          if (businessData.services && businessData.services.length > 0) {
+            setServices(businessData.services.map((service: { id?: string; name?: string; duration?: number; price?: number; description?: string }, index: number) => ({
+              id: service.id || `service-${index}`,
+              name: service.name || '',
+              duration: service.duration || 60,
+              price: service.price || 0,
+              description: service.description || ''
+            })));
+          }
+          
+          if (businessData.workingHours) {
+            setWorkingHours({
+              monday: businessData.workingHours.monday || { isOpen: true, from: '09:00', to: '18:00' },
+              tuesday: businessData.workingHours.tuesday || { isOpen: true, from: '09:00', to: '18:00' },
+              wednesday: businessData.workingHours.wednesday || { isOpen: true, from: '09:00', to: '18:00' },
+              thursday: businessData.workingHours.thursday || { isOpen: true, from: '09:00', to: '18:00' },
+              friday: businessData.workingHours.friday || { isOpen: true, from: '09:00', to: '18:00' },
+              saturday: businessData.workingHours.saturday || { isOpen: true, from: '10:00', to: '16:00' },
+              sunday: businessData.workingHours.sunday || { isOpen: false, from: '10:00', to: '16:00' },
+            });
+          }
+          
+          if (businessData.photos) {
+            setPhotos({
+              logo: businessData.photos.logo || null,
+              coverImage: businessData.photos.coverImage || null,
+              galleryImages: businessData.photos.galleryImages || [],
+            });
+          }
+        } else {
+          // If business doesn't exist or response is not ok, still proceed but show error if needed
+          if (response.status === 404) {
+            console.log('Business not found, creating new business');
+          } else {
+            throw new Error('Failed to fetch business data');
+          }
+        }
+      } catch (error) {
+        console.error('Error loading business data:', error);
+        // Only show error if it's not a 404 (business not found)
+        if (error instanceof Error && !error.message.includes('404')) {
+          setError('Не удалось загрузить данные бизнеса');
+        }
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    loadBusinessData();
+  }, [businessId]);
+
+  // Update submit function to handle both create and update
+  const handleSubmit = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const businessData = {
+        info: businessInfo,
+        address,
+        services,
+        workingHours,
+        photos
+      };
+
+      const url = businessId ? `/api/business/${businessId}` : '/api/business/create';
+      const method = businessId ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(businessData),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || `Failed to ${businessId ? 'update' : 'create'} business profile`);
+      }
+
+      // Redirect to dashboard after successful creation/update
+      router.push('/dashboard');
+      
+    } catch (err) {
+      setError(err instanceof Error ? err.message : `Failed to ${businessId ? 'update' : 'create'} business profile`);
+    } finally {
+      setLoading(false);
+    }
+  };
   const nextStep = () => {
     switch (currentStep) {
       case 'info':
@@ -187,7 +316,7 @@ export default function BusinessProfileSetup() {
     }
   };
 
-  const handleWorkingHoursChange = (day: string, field: string, value: any) => {
+  const handleWorkingHoursChange = (day: string, field: string, value: string | boolean) => {
     setWorkingHours(prev => ({
       ...prev,
       [day]: {
@@ -195,43 +324,6 @@ export default function BusinessProfileSetup() {
         [field]: value
       }
     }));
-  };
-
-  // Submit form
-  const handleSubmit = async () => {
-    setLoading(true);
-    setError('');
-
-    try {
-      const businessData = {
-        info: businessInfo,
-        address,
-        services,
-        workingHours,
-        photos
-      };
-
-      const response = await fetch('/api/business/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(businessData),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || 'Failed to create business profile');
-      }
-
-      // Redirect to dashboard after successful creation
-      router.push('/dashboard');
-      
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
   };
 
   // Render steps
@@ -604,10 +696,13 @@ export default function BusinessProfileSetup() {
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-gray-700">
-          Все готово!
+          {businessId ? 'Готово к обновлению!' : 'Все готово!'}
         </h3>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Проверьте информацию ниже перед созданием профиля бизнеса
+          {businessId 
+            ? 'Проверьте обновленную информацию ниже перед сохранением изменений'
+            : 'Проверьте информацию ниже перед созданием профиля бизнеса'
+          }
         </p>
       </div>
 
@@ -690,15 +785,39 @@ export default function BusinessProfileSetup() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Настройка бизнеса
+            {businessId ? 'Редактирование бизнеса' : 'Настройка бизнеса'}
           </h1>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            Заполните информацию о вашем бизнесе, чтобы начать принимать клиентов
+            {businessId 
+              ? 'Обновите информацию о вашем бизнесе'
+              : 'Заполните информацию о вашем бизнесе, чтобы начать принимать клиентов'
+            }
           </p>
         </div>
 
-        {/* Steps indicator */}
-        <nav aria-label="Progress" className="mb-8">
+        {/* Loading state for data retrieval */}
+        {isLoadingData ? (
+          <Card className="overflow-hidden">
+            <div className="px-4 py-5 sm:p-6">
+              <div className="flex justify-center items-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                <span className="ml-4 text-gray-600 dark:text-gray-400">Загрузка данных бизнеса...</span>
+              </div>
+            </div>
+          </Card>
+        ) : (
+          <>
+            {/* No business notice */}
+            {!businessId && (
+              <div className="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-6">
+                <p className="text-blue-700 dark:text-blue-400">
+                  <strong>Создание нового бизнеса:</strong> Заполните все шаги для создания профиля вашего бизнеса.
+                </p>
+              </div>
+            )}
+
+            {/* Steps indicator */}
+            <nav aria-label="Progress" className="mb-8">
           <ol className="flex items-center justify-between w-full">
             {steps.map((step, stepIdx) => (
               <li key={step.id} className={`relative ${stepIdx !== steps.length - 1 ? 'pr-8' : ''}`}>
@@ -754,11 +873,13 @@ export default function BusinessProfileSetup() {
                 onClick={nextStep}
                 disabled={loading}
               >
-                {currentStep === 'confirmation' ? (loading ? 'Создание...' : 'Создать профиль') : 'Далее'}
+                {currentStep === 'confirmation' ? (loading ? `${businessId ? 'Обновление' : 'Создание'}...` : `${businessId ? 'Обновить' : 'Создать'} профиль`) : 'Далее'}
               </Button>
             </div>
           </div>
         </Card>
+          </>
+        )}
       </div>
     </div>
   );

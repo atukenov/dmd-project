@@ -32,7 +32,6 @@ export async function GET(
     const business = await db
       .collection("businesses")
       .findOne({ _id: new ObjectId(businessId), userId: token.sub });
-
     if (!business) {
       return NextResponse.json(
         { message: "Business not found or access denied" },
