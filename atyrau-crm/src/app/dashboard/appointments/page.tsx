@@ -77,10 +77,20 @@ export default function AppointmentsPage() {
       }
       
       const data = await response.json();
-      setAppointments(data.appointments || []);
+      
+      // Handle the ApiResponseService structure: { success: true, data: { appointments: [...] } }
+      if (data.success && data.data && data.data.appointments) {
+        setAppointments(data.data.appointments);
+      } else if (data.success === false) {
+        // Handle API error response
+        throw new Error(data.error || 'Failed to fetch appointments');
+      } else {
+        // Fallback for unexpected response structure
+        setAppointments([]);
+      }
     } catch (error) {
       console.error('Error fetching appointments:', error);
-      setError(error instanceof Error ? error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" : 'An error occurred');
+      setError(error instanceof Error ? error.message : 'An error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -119,7 +129,7 @@ export default function AppointmentsPage() {
       }
     } catch (error) {
       console.error('Error updating appointment:', error);
-      alert(`Failed to update appointment: ${error instanceof Error ? error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" : 'An error occurred'}`);
+      alert(`Failed to update appointment: ${error instanceof Error ? error.message : 'An error occurred'}`);
     } finally {
       setIsUpdatingAppointment(false);
     }
@@ -153,7 +163,7 @@ export default function AppointmentsPage() {
       }
     } catch (error) {
       console.error('Error updating payment status:', error);
-      alert(`Failed to update payment status: ${error instanceof Error ? error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" : 'An error occurred'}`);
+      alert(`Failed to update payment status: ${error instanceof Error ? error.message : 'An error occurred'}`);
     } finally {
       setIsUpdatingAppointment(false);
     }
@@ -185,7 +195,7 @@ export default function AppointmentsPage() {
       setSelectedAppointment(null);
     } catch (error) {
       console.error('Error cancelling appointment:', error);
-      alert(`Failed to cancel appointment: ${error instanceof Error ? error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" : 'An error occurred'}`);
+      alert(`Failed to cancel appointment: ${error instanceof Error ? error.message : 'An error occurred'}`);
     } finally {
       setIsUpdatingAppointment(false);
     }
@@ -362,7 +372,7 @@ export default function AppointmentsPage() {
       alert('Appointment created successfully');
     } catch (error) {
       console.error('Error creating appointment:', error);
-      alert(`Failed to create appointment: ${error instanceof Error ? error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" : 'An error occurred'}`);
+      alert(`Failed to create appointment: ${error instanceof Error ? error.message : 'An error occurred'}`);
     }
   };
 
@@ -487,7 +497,7 @@ export default function AppointmentsPage() {
                                   )}
                                   
                                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                    � {appointment.client.phone}
+                                    📞 {appointment.client.phone}
                                   </p>
                                 </div>
                                 

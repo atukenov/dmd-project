@@ -57,6 +57,7 @@ export class AuthService {
         token,
       };
     } catch (error) {
+      console.error("Error authenticating request:", error);
       return {
         success: false,
         error: "Authentication failed",
@@ -91,18 +92,21 @@ export class AuthService {
     user: AuthenticatedUser,
     businessId: string
   ): Promise<boolean> {
+    console.log(user, businessId); // Debug log
     try {
       // Admin can access any business
       if (user.role === "admin") {
         return true;
       }
 
-      // Check if user owns the business
-      if (user.businessId && user.businessId.toString() === businessId) {
-        return true;
-      }
+      // Get business data and check if user owns it by userId field
+      const db = await DatabaseService.getDatabase();
+      const business = await db.collection("businesses").findOne({
+        _id: new ObjectId(businessId),
+        userId: user._id.toString(),
+      });
 
-      return false;
+      return !!business;
     } catch (error) {
       console.error("Error verifying business ownership:", error);
       return false;

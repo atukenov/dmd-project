@@ -198,10 +198,16 @@ export class BusinessService {
       if (filters.startDate || filters.endDate) {
         query.startTime = {};
         if (filters.startDate) {
-          query.startTime.$gte = new Date(filters.startDate);
+          const startDate = new Date(filters.startDate);
+          // Set to start of day (00:00:00.000)
+          startDate.setHours(0, 0, 0, 0);
+          query.startTime.$gte = startDate;
         }
         if (filters.endDate) {
-          query.startTime.$lte = new Date(filters.endDate);
+          const endDate = new Date(filters.endDate);
+          // Set to end of day (23:59:59.999) - start of next day minus 1 millisecond
+          endDate.setHours(23, 59, 59, 999);
+          query.startTime.$lte = endDate;
         }
       }
 
@@ -331,6 +337,151 @@ export class BusinessService {
           address: business.address,
         },
         servicesCount,
+      };
+    });
+  }
+
+  /**
+   * Update an appointment
+   */
+  static async updateAppointment(
+    appointmentId: string,
+    updateData: {
+      status?: "scheduled" | "completed" | "cancelled" | "no-show";
+      paymentStatus?: "pending" | "paid" | "refunded";
+      paymentMethod?: string;
+      totalAmount?: number;
+      notes?: string;
+      cancellationReason?: string;
+      cancelledBy?: "client" | "business";
+      reminderSent?: boolean;
+      feedbackSubmitted?: boolean;
+    }
+  ) {
+    return await DatabaseService.executeOperation(async (db) => {
+      // First, get the current appointment to verify it exists and get businessId
+      const existingAppointment = await db.collection("appointments").findOne({
+        _id: new ObjectId(appointmentId),
+      });
+
+      if (!existingAppointment) {
+        throw new Error("Appointment not found");
+      }
+
+      // Prepare update data following the exact schema
+      const updateFields: {
+        updatedAt: Date;
+        status?: string;
+        paymentStatus?: string;
+        paymentMethod?: string;
+        totalAmount?: number;
+        notes?: string;
+        cancellationReason?: string;
+        cancelledBy?: string;
+        cancelledAt?: Date;
+        reminderSent?: boolean;
+        feedbackSubmitted?: boolean;
+      } = {
+        updatedAt: new Date(),
+      };
+
+      // Only update provided fields
+      if (updateData.status !== undefined) {
+        updateFields.status = updateData.status;
+
+        // If cancelling, add cancellation timestamp
+        if (updateData.status === "cancelled") {
+          updateFields.cancelledAt = new Date();
+          if (updateData.cancellationReason) {
+            updateFields.cancellationReason = updateData.cancellationReason;
+          }
+          if (updateData.cancelledBy) {
+            updateFields.cancelledBy = updateData.cancelledBy;
+          }
+        }
+      }
+
+      if (updateData.paymentStatus !== undefined) {
+        updateFields.paymentStatus = updateData.paymentStatus;
+      }
+
+      if (updateData.paymentMethod !== undefined) {
+        updateFields.paymentMethod = updateData.paymentMethod;
+      }
+
+      if (updateData.totalAmount !== undefined) {
+        updateFields.totalAmount = updateData.totalAmount;
+      }
+
+      if (updateData.notes !== undefined) {
+        updateFields.notes = updateData.notes;
+      }
+
+      if (updateData.reminderSent !== undefined) {
+        updateFields.reminderSent = updateData.reminderSent;
+      }
+
+      if (updateData.feedbackSubmitted !== undefined) {
+        updateFields.feedbackSubmitted = updateData.feedbackSubmitted;
+      }
+
+      // Update the appointment
+      const result = await db
+        .collection("appointments")
+        .updateOne(
+          { _id: new ObjectId(appointmentId) },
+          { $set: updateFields }
+        );
+
+      if (result.matchedCount === 0) {
+        throw new Error("Appointment not found");
+      }
+
+      if (result.modifiedCount === 0) {
+        throw new Error("No changes were made to the appointment");
+      }
+
+      // Get the updated appointment with populated client and service details
+      const updatedAppointment = await db.collection("appointments").findOne({
+        _id: new ObjectId(appointmentId),
+      });
+
+      if (!updatedAppointment) {
+        throw new Error("Failed to retrieve updated appointment");
+      }
+
+      // Get client details
+      const client = await db.collection("clients").findOne({
+        _id: updatedAppointment.clientId,
+      });
+
+      // Get service details
+      const service = await db.collection("services").findOne({
+        _id: updatedAppointment.serviceId,
+      });
+
+      // Return the updated appointment with populated details and businessId
+      return {
+        appointment: {
+          ...updatedAppointment,
+          client: client
+            ? {
+                _id: client._id,
+                name: client.name,
+                phone: client.phone,
+                email: client.email,
+              }
+            : null,
+          service: service
+            ? {
+                _id: service._id,
+                name: service.name,
+                duration: service.duration,
+                price: service.price,
+              }
+            : null,
+        },
+        businessId: updatedAppointment.businessId.toString(),
       };
     });
   }
