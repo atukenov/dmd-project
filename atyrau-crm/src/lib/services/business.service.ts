@@ -175,4 +175,84 @@ export class BusinessService {
       };
     });
   }
+
+  /**
+   * Get appointments with optional filters
+   */
+  static async getAppointments(filters: {
+    businessId: string;
+    startDate?: string;
+    endDate?: string;
+    status?: string;
+  }) {
+    return await DatabaseService.executeOperation(async (db) => {
+      const query: {
+        businessId: ObjectId;
+        startTime?: { $gte?: Date; $lte?: Date };
+        status?: string;
+      } = {
+        businessId: new ObjectId(filters.businessId),
+      };
+
+      // Add date range filter if provided
+      if (filters.startDate || filters.endDate) {
+        query.startTime = {};
+        if (filters.startDate) {
+          query.startTime.$gte = new Date(filters.startDate);
+        }
+        if (filters.endDate) {
+          query.startTime.$lte = new Date(filters.endDate);
+        }
+      }
+
+      // Add status filter if provided
+      if (filters.status) {
+        query.status = filters.status;
+      }
+
+      // Get appointments with client and service details
+      const appointments = await db
+        .collection("appointments")
+        .find(query)
+        .sort({ startTime: 1 })
+        .toArray();
+
+      // Populate client and service details
+      const appointmentsWithDetails = await Promise.all(
+        appointments.map(async (appointment) => {
+          // Get client details
+          const client = await db.collection("clients").findOne({
+            _id: appointment.clientId,
+          });
+
+          // Get service details
+          const service = await db.collection("services").findOne({
+            _id: appointment.serviceId,
+          });
+
+          return {
+            ...appointment,
+            client: client
+              ? {
+                  _id: client._id,
+                  name: client.name,
+                  phone: client.phone,
+                  email: client.email,
+                }
+              : null,
+            service: service
+              ? {
+                  _id: service._id,
+                  name: service.name,
+                  duration: service.duration,
+                  price: service.price,
+                }
+              : null,
+          };
+        })
+      );
+
+      return appointmentsWithDetails;
+    });
+  }
 }
