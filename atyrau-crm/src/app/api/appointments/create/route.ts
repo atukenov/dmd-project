@@ -11,7 +11,6 @@ export async function POST(request: NextRequest) {
       businessId,
       serviceId,
       startTime,
-      endTime,
       clientName,
       clientPhone,
       clientEmail,
@@ -19,7 +18,13 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Validate required fields
-    if (!businessId || !startTime || !endTime || !clientName || !clientPhone) {
+    if (
+      !businessId ||
+      !serviceId ||
+      !startTime ||
+      !clientName ||
+      !clientPhone
+    ) {
       return NextResponse.json(
         { message: "Missing required fields" },
         { status: 400 }
@@ -29,6 +34,24 @@ export async function POST(request: NextRequest) {
     // Connect to MongoDB
     const client = await clientPromise;
     const db = client.db();
+
+    // Get service details to calculate appointment duration
+    const service = await db
+      .collection("services")
+      .findOne({ _id: new ObjectId(serviceId) });
+
+    if (!service) {
+      return NextResponse.json(
+        { message: "Service not found" },
+        { status: 404 }
+      );
+    }
+
+    // Calculate endTime based on service duration
+    const requestedStart = new Date(startTime);
+    const requestedEnd = new Date(
+      requestedStart.getTime() + service.duration * 60 * 1000
+    ); // duration is in minutes
 
     // Check if user is authenticated (for client identification)
     const token = await getToken({ req: request });
@@ -82,9 +105,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if there are any conflicts with the requested time slot
-    const requestedStart = new Date(startTime);
-    const requestedEnd = new Date(endTime);
-
     const existingAppointments = await db
       .collection("appointments")
       .find({
@@ -120,11 +140,12 @@ export async function POST(request: NextRequest) {
     const appointment = {
       businessId: new ObjectId(businessId),
       clientId,
-      serviceId: serviceId ? new ObjectId(serviceId) : null,
+      serviceId: new ObjectId(serviceId),
       startTime: requestedStart,
       endTime: requestedEnd,
       status: "scheduled", // scheduled, completed, cancelled, no-show
       paymentStatus: "pending", // pending, paid, refunded
+      totalAmount: service.price, // Use service price
       notes: notes || "",
       createdAt: new Date(),
     };
@@ -143,10 +164,16 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Error booking appointment:", error);
     return NextResponse.json(
-      { message: "Failed to book appointment", error: error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" },
+      {
+        message: "Failed to book appointment",
+        error:
+          error instanceof Error
+            ? error instanceof Error
+              ? error.message
+              : "Unknown error"
+            : "Unknown error",
+      },
       { status: 500 }
     );
   }
 }
-
-

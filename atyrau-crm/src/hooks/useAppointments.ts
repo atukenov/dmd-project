@@ -6,7 +6,6 @@ import { Service } from "@/types/models";
 interface AppointmentFormData {
   serviceId: string;
   startTime: string;
-  endTime: string;
   clientName: string;
   clientPhone: string;
   clientEmail?: string;

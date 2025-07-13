@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
 
     // Build query filter
     interface AppointmentFilter {
-      businessId?: string;
+      businessId?: ObjectId | string;
       startTime?: {
         $gte?: Date;
         $lte?: Date;
@@ -85,7 +85,10 @@ export async function GET(request: NextRequest) {
     const filter: AppointmentFilter = {};
 
     if (targetBusinessId) {
-      filter.businessId = targetBusinessId; // Store as string, not ObjectId
+      // Try both string and ObjectId formats for businessId
+      filter.businessId = ObjectId.isValid(targetBusinessId)
+        ? new ObjectId(targetBusinessId)
+        : targetBusinessId;
     }
 
     // Date range filter
@@ -109,12 +112,26 @@ export async function GET(request: NextRequest) {
       filter.status = status;
     }
 
+    // Debug: Log the filter being used
+    console.log("Filter being used:", JSON.stringify(filter, null, 2));
+
+    // Debug: Get all appointments for this business to see what exists
+    const allAppointments = await db
+      .collection("appointments")
+      .find({ businessId: targetBusinessId })
+      .toArray();
+
+    console.log("All appointments for business:", allAppointments.length);
+    console.log("Sample appointment:", allAppointments[0]);
+
     // Get appointments
     const appointments = await db
       .collection("appointments")
       .find(filter)
       .sort({ startTime: 1 })
       .toArray();
+
+    console.log("Filtered appointments:", appointments.length);
 
     // Get client and service data for each appointment
     const appointmentsWithDetails = await Promise.all(
