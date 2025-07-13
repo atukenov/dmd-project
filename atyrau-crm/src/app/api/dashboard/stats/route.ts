@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     if (businessId) {
       // If businessId is provided, check if user has permission to access it
       const userRole = token.role as string;
-      
+
       if (userRole === "admin") {
         // Admin can access any business
         targetBusiness = await db
@@ -32,12 +32,10 @@ export async function GET(request: NextRequest) {
           .findOne({ _id: new ObjectId(businessId) });
       } else if (userRole === "business") {
         // Business users can only access their own business
-        targetBusiness = await db
-          .collection("businesses")
-          .findOne({ 
-            _id: new ObjectId(businessId),
-            userId: token.sub 
-          });
+        targetBusiness = await db.collection("businesses").findOne({
+          _id: new ObjectId(businessId),
+          userId: token.sub,
+        });
       } else {
         return NextResponse.json(
           { message: "You do not have permission to access this resource" },
@@ -159,4 +157,3 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-

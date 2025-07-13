@@ -43,18 +43,16 @@ export async function GET(request: NextRequest) {
     } else {
       // If businessId is provided, check if user has permission to access it
       const userRole = token.role as string;
-      
+
       // Admin can access any business
       if (userRole === "admin") {
         // Allow admin access
       } else if (userRole === "business") {
         // Business users can only access their own business
-        const business = await db
-          .collection("businesses")
-          .findOne({ 
-            _id: new ObjectId(targetBusinessId),
-            userId: token.sub 
-          });
+        const business = await db.collection("businesses").findOne({
+          _id: new ObjectId(targetBusinessId),
+          userId: token.sub,
+        });
 
         if (!business) {
           return NextResponse.json(
@@ -93,10 +91,11 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Error fetching services:", error);
     return NextResponse.json(
-      { message: "Failed to fetch services", error: error instanceof Error ? error.message : "Unknown error" },
+      {
+        message: "Failed to fetch services",
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }
 }
-
-
