@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Calendar } from '@/components/molecules/Calendar';
 import { formatDate } from '@/lib/utils/date-utils';
-import { getSession } from 'next-auth/react';
 import { useBusinessStore } from '@/store/businessStore';
 import { useAppointments } from '@/hooks/useAppointments';
 
@@ -27,7 +26,7 @@ interface Appointment {
 }
 
 export default function AppointmentsPage() {
-  const { businessId, businessName } = useBusinessStore();
+  const { businessId } = useBusinessStore();
   const { services, servicesLoading, servicesError, createAppointment, isCreating } = useAppointments();
   
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -47,7 +46,7 @@ export default function AppointmentsPage() {
   });
   
   // Function to fetch appointments for the selected date
-  const fetchAppointments = async () => {
+  const fetchAppointments = useCallback(async () => {
     if (!selectedDate || !businessId) return;
     
     setIsLoading(true);
@@ -63,18 +62,18 @@ export default function AppointmentsPage() {
       
       const data = await response.json();
       setAppointments(data.appointments || []);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error fetching appointments:', error);
-      setError(error.message);
+      setError(error instanceof Error ? error.message : 'An error occurred');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedDate, businessId]);
 
   // Fetch appointments when selectedDate or businessId changes
   useEffect(() => {
     fetchAppointments();
-  }, [selectedDate, businessId]);
+  }, [fetchAppointments]);
 
   // Handle status change
   const handleStatusChange = async (appointmentId: string, newStatus: string) => {
@@ -106,9 +105,9 @@ export default function AppointmentsPage() {
       });
       
       setAppointments(updatedAppointments);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating appointment:', error);
-      alert(`Failed to update appointment: ${error.message}`);
+      alert(`Failed to update appointment: ${error instanceof Error ? error.message : 'An error occurred'}`);
     }
   };
 
@@ -142,9 +141,9 @@ export default function AppointmentsPage() {
       });
       
       setAppointments(updatedAppointments);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating payment status:', error);
-      alert(`Failed to update payment status: ${error.message}`);
+      alert(`Failed to update payment status: ${error instanceof Error ? error.message : 'An error occurred'}`);
     }
   };
 
@@ -179,9 +178,9 @@ export default function AppointmentsPage() {
       
       setAppointments(updatedAppointments);
       setSelectedAppointment(null);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error cancelling appointment:', error);
-      alert(`Failed to cancel appointment: ${error.message}`);
+      alert(`Failed to cancel appointment: ${error instanceof Error ? error.message : 'An error occurred'}`);
     }
   };
 
@@ -194,6 +193,31 @@ export default function AppointmentsPage() {
       hour12: false
     });
   };
+
+  // Generate time slots for the day (8 AM to 8 PM)
+  const generateTimeSlots = () => {
+    const slots = [];
+    const startHour = 8;
+    const endHour = 20;
+    
+    for (let hour = startHour; hour <= endHour; hour++) {
+      const timeSlot = `${hour.toString().padStart(2, '0')}:00`;
+      const appointmentsInSlot = appointments.filter(appointment => {
+        const appointmentHour = new Date(appointment.startTime).getHours();
+        return appointmentHour === hour;
+      });
+      
+      slots.push({
+        time: timeSlot,
+        hour: hour,
+        appointments: appointmentsInSlot
+      });
+    }
+    
+    return slots;
+  };
+
+  const timeSlots = generateTimeSlots();
 
   // Calculate end time based on selected service duration
   const updateEndTime = (serviceId: string, startTimeStr: string) => {
@@ -260,9 +284,9 @@ export default function AppointmentsPage() {
       fetchAppointments();
       
       alert('Appointment created successfully');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating appointment:', error);
-      alert(`Failed to create appointment: ${error.message}`);
+      alert(`Failed to create appointment: ${error instanceof Error ? error.message : 'An error occurred'}`);
     }
   };
 
@@ -306,67 +330,108 @@ export default function AppointmentsPage() {
             <div className="text-red-500 p-4 text-center">
               {error}
             </div>
-          ) : appointments.length === 0 ? (
-            <div className="text-gray-500 p-4 text-center">
-              Нет записей на эту дату
-            </div>
           ) : (
-            <div className="space-y-4">
-              {appointments.map((appointment) => (
-                <div
-                  key={appointment._id}
-                  className={`border-l-4 p-4 rounded-r-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer ${
-                    appointment.status === 'cancelled' 
-                      ? 'border-gray-400 bg-gray-50 dark:bg-gray-700' 
-                      : appointment.status === 'completed' 
-                      ? 'border-green-500 dark:border-green-400' 
-                      : 'border-blue-500 dark:border-blue-400'
-                  }`}
-                  onClick={() => setSelectedAppointment(appointment)}
-                >
-                  <div className="flex justify-between">
-                    <div>
-                      <p className="font-semibold dark:text-white">{appointment.client.name}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {formatTimeDisplay(appointment.startTime)} - {formatTimeDisplay(appointment.endTime)}
-                      </p>
-                      {appointment.service && (
-                        <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
-                          Услуга: {appointment.service.name} ({appointment.service.duration} мин)
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <span className={`inline-flex rounded-full px-2 text-xs font-semibold ${
-                        appointment.status === 'scheduled' 
-                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' 
-                          : appointment.status === 'completed' 
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                          : appointment.status === 'cancelled' 
-                          ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' 
-                          : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                      }`}>
-                        {appointment.status === 'scheduled' && 'Запланировано'}
-                        {appointment.status === 'completed' && 'Завершено'}
-                        {appointment.status === 'cancelled' && 'Отменено'}
-                        {appointment.status === 'no-show' && 'Не явился'}
-                      </span>
-                      
-                      <span className={`ml-2 inline-flex rounded-full px-2 text-xs font-semibold ${
-                        appointment.paymentStatus === 'paid' 
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                          : appointment.paymentStatus === 'refunded' 
-                          ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' 
-                          : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                      }`}>
-                        {appointment.paymentStatus === 'paid' && 'Оплачено'}
-                        {appointment.paymentStatus === 'refunded' && 'Возмещено'}
-                        {appointment.paymentStatus === 'pending' && 'Ожидает оплаты'}
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {timeSlots.map((slot) => (
+                <div key={slot.time} className="border border-gray-200 dark:border-gray-700 rounded-md">
+                  {/* Time Slot Header */}
+                  <div className="bg-gray-50 dark:bg-gray-700 px-4 py-2 border-b border-gray-200 dark:border-gray-600">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium text-gray-700 dark:text-gray-300">{slot.time}</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        {slot.appointments.length} {slot.appointments.length === 1 ? 'запись' : 'записей'}
                       </span>
                     </div>
                   </div>
+                  
+                  {/* Appointments in this time slot */}
+                  <div className="p-2">
+                    {slot.appointments.length === 0 ? (
+                      <div className="text-center py-4 text-gray-400 dark:text-gray-500 text-sm">
+                        Свободное время
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {slot.appointments.map((appointment) => (
+                          <div
+                            key={appointment._id}
+                            className={`p-3 rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 border-l-4 ${
+                              appointment.status === 'cancelled' 
+                                ? 'border-gray-400 bg-gray-50 dark:bg-gray-700 opacity-60' 
+                                : appointment.status === 'completed' 
+                                ? 'border-green-500 dark:border-green-400 bg-green-50 dark:bg-green-900/20' 
+                                : appointment.status === 'no-show'
+                                ? 'border-yellow-500 dark:border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20'
+                                : 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                            }`}
+                            onClick={() => setSelectedAppointment(appointment)}
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <p className="font-semibold text-gray-900 dark:text-white">
+                                    {appointment.client.name}
+                                  </p>
+                                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                                    {formatTimeDisplay(appointment.startTime)} - {formatTimeDisplay(appointment.endTime)}
+                                  </span>
+                                </div>
+                                
+                                {appointment.service && (
+                                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                    {appointment.service.name} • {appointment.service.price} ₸
+                                  </p>
+                                )}
+                                
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                  📞 {appointment.client.phone}
+                                </p>
+                              </div>
+                              
+                              <div className="flex flex-col gap-1 items-end">
+                                <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
+                                  appointment.status === 'scheduled' 
+                                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200' 
+                                    : appointment.status === 'completed' 
+                                    ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200' 
+                                    : appointment.status === 'cancelled' 
+                                    ? 'bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-300' 
+                                    : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200'
+                                }`}>
+                                  {appointment.status === 'scheduled' && 'Запланировано'}
+                                  {appointment.status === 'completed' && 'Завершено'}
+                                  {appointment.status === 'cancelled' && 'Отменено'}
+                                  {appointment.status === 'no-show' && 'Не явился'}
+                                </span>
+                                
+                                <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
+                                  appointment.paymentStatus === 'paid' 
+                                    ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200' 
+                                    : appointment.paymentStatus === 'refunded' 
+                                    ? 'bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-300' 
+                                    : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200'
+                                }`}>
+                                  {appointment.paymentStatus === 'paid' && '💰 Оплачено'}
+                                  {appointment.paymentStatus === 'refunded' && '↩️ Возмещено'}
+                                  {appointment.paymentStatus === 'pending' && '⏳ Ожидает'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
+              
+              {appointments.length === 0 && (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <div className="text-4xl mb-2">📅</div>
+                  <p className="text-lg font-medium">Нет записей на эту дату</p>
+                  <p className="text-sm">Нажмите &quot;Новая запись&quot; чтобы создать первую запись</p>
+                </div>
+              )}
             </div>
           )}
         </div>
