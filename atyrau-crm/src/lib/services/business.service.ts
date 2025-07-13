@@ -255,4 +255,83 @@ export class BusinessService {
       return appointmentsWithDetails;
     });
   }
+
+  /**
+   * Check if user has completed business setup
+   */
+  static async checkBusinessSetup(userId: string) {
+    return await DatabaseService.executeOperation(async (db) => {
+      // Check if user has a business profile
+      const business = await db.collection("businesses").findOne({
+        userId,
+      });
+
+      if (!business) {
+        return {
+          hasSetup: false,
+          message: "Business profile not found",
+        };
+      }
+
+      // Check if business has required fields according to schema
+      const missingFields: string[] = [];
+
+      if (!business.name) missingFields.push("name");
+      if (!business.category) missingFields.push("category");
+      if (!business.description) missingFields.push("description");
+
+      // Check contacts object
+      if (!business.contacts) {
+        missingFields.push("contacts");
+      } else {
+        if (!business.contacts.phone) missingFields.push("contacts.phone");
+        if (!business.contacts.email) missingFields.push("contacts.email");
+      }
+
+      // Check address object
+      if (!business.address) {
+        missingFields.push("address");
+      } else {
+        if (!business.address.street) missingFields.push("address.street");
+        if (!business.address.building) missingFields.push("address.building");
+        if (!business.address.city) missingFields.push("address.city");
+        if (!business.address.postalCode)
+          missingFields.push("address.postalCode");
+      }
+
+      if (missingFields.length > 0) {
+        return {
+          hasSetup: false,
+          message: `Missing required fields: ${missingFields.join(", ")}`,
+          missingFields,
+        };
+      }
+      console.log(business._id);
+      // Check if business has at least one service
+      const servicesCount = await db.collection("services").countDocuments({
+        businessId: business._id.toString(),
+      });
+
+      if (servicesCount === 0) {
+        return {
+          hasSetup: false,
+          message: "No services configured",
+          needsServices: true,
+        };
+      }
+
+      return {
+        hasSetup: true,
+        business: {
+          _id: business._id.toString(), // Convert ObjectId to string
+          name: business.name,
+          category: business.category,
+          description: business.description,
+          contacts: business.contacts,
+          address: business.address,
+        },
+        servicesCount,
+      };
+    });
+  }
 }

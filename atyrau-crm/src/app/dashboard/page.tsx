@@ -46,18 +46,23 @@ export default function Dashboard() {
     const checkBusinessSetup = async () => {
       try {
         const response = await fetch('/api/business/check');
-        const data = await response.json();
+        const resData = await response.json();
+        const data = resData.data;
+        
+        console.log('Business check response:', data); // Debug log
         
         // Update the global business store
-        setIsBusinessSetup(data.isSetup);
+        setIsBusinessSetup(data.hasSetup);
         
         // If business is setup, store the business ID and name
-        if (data.isSetup) {
+        if (data.hasSetup) {
           if (data.businessId) {
+            console.log('Setting business ID:', data.businessId); // Debug log
             setBusinessId(data.businessId);
           }
           
           if (data.businessName) {
+            console.log('Setting business name:', data.businessName); // Debug log
             setBusinessName(data.businessName);
           }
         }
@@ -73,9 +78,17 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch('/api/dashboard/stats');
+        console.log('Fetching stats with businessId:', businessId); // Debug log
+        const response = await fetch(`/api/dashboard/stats?businessId=${businessId}`);
         const data = await response.json();
-        setStats(data);
+        
+        console.log('Stats response:', data); // Debug log
+        
+        if (response.ok) {
+          setStats(data);
+        } else {
+          console.error('Failed to fetch stats:', data.message);
+        }
       } catch (error) {
         console.error('Failed to fetch dashboard stats:', error);
       }
@@ -91,9 +104,17 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchRecentAppointments = async () => {
       try {
-        const response = await fetch('/api/dashboard/recent-appointments');
+        console.log('Fetching recent appointments with businessId:', businessId); // Debug log
+        const response = await fetch(`/api/dashboard/recent-appointments?businessId=${businessId}`);
         const data = await response.json();
-        setRecentAppointments(data);
+        
+        console.log('Recent appointments response:', data); // Debug log
+        
+        if (response.ok) {
+          setRecentAppointments(data);
+        } else {
+          console.error('Failed to fetch recent appointments:', data.message);
+        }
       } catch (error) {
         console.error('Failed to fetch recent appointments:', error);
       }
