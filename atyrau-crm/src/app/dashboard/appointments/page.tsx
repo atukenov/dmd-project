@@ -2,7 +2,7 @@
 
 import { Calendar } from "@/components/molecules/Calendar";
 import { useAppointments } from "@/hooks/useAppointments";
-import { formatDate } from "@/lib/utils/date-utils";
+import { formatDate, formatTimeDisplay } from "@/lib/utils/date-utils";
 import { useBusinessStore } from "@/store/businessStore";
 import { useCallback, useEffect, useState } from "react";
 
@@ -240,16 +240,6 @@ export default function AppointmentsPage() {
     } finally {
       setIsUpdatingAppointment(false);
     }
-  };
-
-  // Format time for display
-  const formatTimeDisplay = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString("ru-RU", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
   };
 
   // Generate time slots for the day (8 AM to 8 PM) with 15-minute intervals

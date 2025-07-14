@@ -123,6 +123,18 @@ export function formatTime(hours: number, minutes: number): string {
 }
 
 /**
+ * Format time for display from date string (HH:MM in Russian locale)
+ */
+export function formatTimeDisplay(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleTimeString("ru-RU", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
+/**
  * Check if two dates are the same day (ignoring time)
  */
 export function isSameDay(date1: Date, date2: Date): boolean {
@@ -156,7 +168,7 @@ export function isPastDay(date: Date): boolean {
  */
 export function generateTimeSlots(
   date: Date,
-  businessHours: any,
+  businessHours: Record<string, { isOpen: boolean; from: string; to: string }>,
   serviceDuration: number = 60,
   bookedSlots: { start: Date; end: Date }[] = []
 ): { time: string; timestamp: number; available: boolean }[] {
@@ -187,7 +199,6 @@ export function generateTimeSlots(
 
   // Create time slots
   const slotDuration = serviceDuration || 60; // Default to 60 minutes if not provided
-  const slotIntervals = slotDuration / 15; // Each slot is 15 minutes
 
   // Start time in minutes since midnight
   let currentMinutes = fromHour * 60 + fromMinute;
@@ -232,4 +243,3 @@ export function generateTimeSlots(
 
   return slots;
 }
-
