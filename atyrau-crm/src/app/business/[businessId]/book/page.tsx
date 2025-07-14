@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Calendar } from '@/components/molecules/Calendar';
 import { TimeSlots } from '@/components/molecules/TimeSlots';
 import { formatDate } from '@/lib/utils/date-utils';
@@ -19,10 +19,16 @@ interface Service {
   description: string;
 }
 
+interface TimeSlot {
+  time: string;
+  timestamp: number;
+  available: boolean;
+}
+
 export default function BookingPage({ params }: BookingPageProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<number | undefined>(undefined);
-  const [availableTimeSlots, setAvailableTimeSlots] = useState<any[]>([]);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [services, setServices] = useState<Service[]>([]);
   const [selectedService, setSelectedService] = useState<string>('');
@@ -38,25 +44,26 @@ export default function BookingPage({ params }: BookingPageProps) {
   useEffect(() => {
     async function fetchServices() {
       try {
-        const response = await fetch(`/api/services/list?businessId=${params.businessId}`);
+        const response = await fetch(`/api/business/${params.businessId}/public/services`);
         const data = await response.json();
-        setServices(data.services || []);
+        
+        // Handle the API response structure
+        if (data.success && data.data) {
+          setServices(data.data || []);
+        } else {
+          console.error('Failed to fetch services:', data.error);
+          setServices([]);
+        }
       } catch (error) {
         console.error('Error fetching services:', error);
+        setServices([]);
       }
     }
     
     fetchServices();
   }, [params.businessId]);
 
-  // Fetch available time slots when date or service changes
-  useEffect(() => {
-    if (selectedDate) {
-      fetchAvailableTimeSlots();
-    }
-  }, [selectedDate, selectedService]);
-
-  async function fetchAvailableTimeSlots() {
+  const fetchAvailableTimeSlots = useCallback(async () => {
     if (!selectedDate) return;
 
     setIsLoading(true);
@@ -76,7 +83,14 @@ export default function BookingPage({ params }: BookingPageProps) {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [selectedDate, serviceDuration, params.businessId]);
+
+  // Fetch available time slots when date or service changes
+  useEffect(() => {
+    if (selectedDate) {
+      fetchAvailableTimeSlots();
+    }
+  }, [selectedDate, selectedService, fetchAvailableTimeSlots]);
 
   function handleServiceChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const serviceId = e.target.value;
