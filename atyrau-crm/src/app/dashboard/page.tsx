@@ -49,20 +49,16 @@ export default function Dashboard() {
         const resData = await response.json();
         const data = resData.data;
         
-        console.log('Business check response:', data); // Debug log
-        
         // Update the global business store
         setIsBusinessSetup(data.hasSetup);
         
         // If business is setup, store the business ID and name
         if (data.hasSetup) {
           if (data.businessId) {
-            console.log('Setting business ID:', data.businessId); // Debug log
             setBusinessId(data.businessId);
           }
           
           if (data.businessName) {
-            console.log('Setting business name:', data.businessName); // Debug log
             setBusinessName(data.businessName);
           }
         }
@@ -78,11 +74,8 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        console.log('Fetching stats with businessId:', businessId); // Debug log
         const response = await fetch(`/api/dashboard/stats?businessId=${businessId}`);
         const data = await response.json();
-        
-        console.log('Stats response:', data); // Debug log
         
         if (response.ok) {
           setStats(data);
@@ -104,11 +97,8 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchRecentAppointments = async () => {
       try {
-        console.log('Fetching recent appointments with businessId:', businessId); // Debug log
         const response = await fetch(`/api/dashboard/recent-appointments?businessId=${businessId}`);
         const data = await response.json();
-        
-        console.log('Recent appointments response:', data); // Debug log
         
         if (response.ok) {
           setRecentAppointments(data);
