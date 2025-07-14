@@ -24,7 +24,7 @@ type Step = 'info' | 'address' | 'services' | 'hours' | 'photos' | 'confirmation
 
 export default function BusinessProfileSetup() {
   const router = useRouter();
-  const { businessId } = useBusinessStore();
+  const { businessId, setBusinessId, setBusinessName, setIsBusinessSetup } = useBusinessStore();
   const [currentStep, setCurrentStep] = useState<Step>('info');
   const [loading, setLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
@@ -70,90 +70,97 @@ export default function BusinessProfileSetup() {
   // Load existing business data
   useEffect(() => {
     const loadBusinessData = async () => {
-
-      if (!businessId) {
-        setIsLoadingData(false);
-        return;
-      }
-
       try {
         setIsLoadingData(true);
-        const response = await fetch(`/api/business/${businessId}`);
         
-        if (response.ok) {
-          const businessData = await response.json();
+        // First, check if user has a business setup
+        const checkResponse = await fetch('/api/business/check');
+        
+        if (!checkResponse.ok) {
+          throw new Error('Failed to check business setup');
+        }
+
+        const checkData = await checkResponse.json();
+        
+        // If user has a business, load its data
+        if (checkData.data?.hasSetup && checkData.data?.businessId) {
+          const businessResponse = await fetch(`/api/business/${checkData.data.businessId}`);
           
-          // Populate form with existing data
-          if (businessData.info) {
-            setBusinessInfo({
-              name: businessData.info.name || '',
-              category: businessData.info.category || '',
-              description: businessData.info.description || '',
-              phone: businessData.info.phone || '',
-              email: businessData.info.email || '',
-            });
-          }
-          
-          if (businessData.address) {
-            setAddress({
-              street: businessData.address.street || '',
-              building: businessData.address.building || '',
-              city: businessData.address.city || 'Атырау',
-              postalCode: businessData.address.postalCode || '',
-              landmark: businessData.address.landmark || '',
-            });
-          }
-          
-          if (businessData.services && businessData.services.length > 0) {
-            setServices(businessData.services.map((service: { id?: string; name?: string; duration?: number; price?: number; description?: string }, index: number) => ({
-              id: service.id || `service-${index}`,
-              name: service.name || '',
-              duration: service.duration || 60,
-              price: service.price || 0,
-              description: service.description || ''
-            })));
-          }
-          
-          if (businessData.workingHours) {
-            setWorkingHours({
-              monday: businessData.workingHours.monday || { isOpen: true, from: '09:00', to: '18:00' },
-              tuesday: businessData.workingHours.tuesday || { isOpen: true, from: '09:00', to: '18:00' },
-              wednesday: businessData.workingHours.wednesday || { isOpen: true, from: '09:00', to: '18:00' },
-              thursday: businessData.workingHours.thursday || { isOpen: true, from: '09:00', to: '18:00' },
-              friday: businessData.workingHours.friday || { isOpen: true, from: '09:00', to: '18:00' },
-              saturday: businessData.workingHours.saturday || { isOpen: true, from: '10:00', to: '16:00' },
-              sunday: businessData.workingHours.sunday || { isOpen: false, from: '10:00', to: '16:00' },
-            });
-          }
-          
-          if (businessData.photos) {
-            setPhotos({
-              logo: businessData.photos.logo || null,
-              coverImage: businessData.photos.coverImage || null,
-              galleryImages: businessData.photos.galleryImages || [],
-            });
+          if (businessResponse.ok) {
+            const businessData = await businessResponse.json();
+            
+            // Handle nested response structure
+            const actualData = businessData.data?.data || businessData.data || businessData;
+            
+            // Populate form with existing data
+            if (actualData.info) {
+              setBusinessInfo({
+                name: actualData.info.name || '',
+                category: actualData.info.category || '',
+                description: actualData.info.description || '',
+                phone: actualData.info.phone || '',
+                email: actualData.info.email || '',
+              });
+            }
+            
+            if (actualData.address) {
+              setAddress({
+                street: actualData.address.street || '',
+                building: actualData.address.building || '',
+                city: actualData.address.city || 'Атырау',
+                postalCode: actualData.address.postalCode || '',
+                landmark: actualData.address.landmark || '',
+              });
+            }
+            
+            if (actualData.services && actualData.services.length > 0) {
+              setServices(actualData.services.map((service: { id?: string; name?: string; duration?: number; price?: number; description?: string }, index: number) => ({
+                id: service.id || `service-${index}`,
+                name: service.name || '',
+                duration: service.duration || 60,
+                price: service.price || 0,
+                description: service.description || ''
+              })));
+            }
+            
+            if (actualData.workingHours) {
+              setWorkingHours({
+                monday: actualData.workingHours.monday || { isOpen: true, from: '09:00', to: '18:00' },
+                tuesday: actualData.workingHours.tuesday || { isOpen: true, from: '09:00', to: '18:00' },
+                wednesday: actualData.workingHours.wednesday || { isOpen: true, from: '09:00', to: '18:00' },
+                thursday: actualData.workingHours.thursday || { isOpen: true, from: '09:00', to: '18:00' },
+                friday: actualData.workingHours.friday || { isOpen: true, from: '09:00', to: '18:00' },
+                saturday: actualData.workingHours.saturday || { isOpen: true, from: '10:00', to: '16:00' },
+                sunday: actualData.workingHours.sunday || { isOpen: false, from: '10:00', to: '16:00' },
+              });
+            }
+            
+            if (actualData.photos) {
+              setPhotos({
+                logo: actualData.photos.logo || null,
+                coverImage: actualData.photos.coverImage || null,
+                galleryImages: actualData.photos.galleryImages || [],
+              });
+            }
+
+            // Update store with the found business data
+            setBusinessId(checkData.data.businessId);
+            setBusinessName(actualData.info?.name || '');
+            setIsBusinessSetup(true);
           }
         } else {
-          // If business doesn't exist or response is not ok, still proceed but show error if needed
-          if (response.status === 404) {
-            console.log('Business not found, creating new business');
-          } else {
-            throw new Error('Failed to fetch business data');
-          }
+          // No business setup yet, continue with empty form for new business creation
         }
       } catch (error) {
         console.error('Error loading business data:', error);
-        // Only show error if it's not a 404 (business not found)
-        if (error instanceof Error && !error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error".includes('404')) {
-          setError('Не удалось загрузить данные бизнеса');
-        }
+        setError('Не удалось загрузить данные бизнеса');
       } finally {
         setIsLoadingData(false);
       }
     };
 
     loadBusinessData();
-  }, [businessId]);
+  }, [setBusinessId, setBusinessName, setIsBusinessSetup]); // Add store setters as dependencies
 
   // Update submit function to handle both create and update
   const handleSubmit = async () => {
@@ -183,6 +190,16 @@ export default function BusinessProfileSetup() {
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.message || `Failed to ${businessId ? 'update' : 'create'} business profile`);
+      }
+
+      const responseData = await response.json();
+      
+      // Update store with the new/updated business data
+      const newBusinessId = responseData.businessId || responseData._id;
+      if (newBusinessId) {
+        setBusinessId(newBusinessId);
+        setBusinessName(businessInfo.name);
+        setIsBusinessSetup(true);
       }
 
       // Redirect to dashboard after successful creation/update

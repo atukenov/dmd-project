@@ -119,9 +119,11 @@ export class AuthService {
   static async getBusinessIdForUser(userId: ObjectId): Promise<string | null> {
     try {
       const db = await DatabaseService.getDatabase();
-      const user = await db.collection("users").findOne({ _id: userId });
+      const business = await db.collection("businesses").findOne({
+        userId: userId.toString(),
+      });
 
-      return user?.businessId ? user.businessId.toString() : null;
+      return business?._id ? business._id.toString() : null;
     } catch (error) {
       console.error("Error getting business ID for user:", error);
       return null;
