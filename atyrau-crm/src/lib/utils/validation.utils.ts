@@ -81,8 +81,16 @@ export const validateAppointmentData = (data: {
     const startDate = new Date(data.startTime);
     if (isNaN(startDate.getTime())) {
       errors.push("Invalid start time format");
-    } else if (startDate < new Date()) {
-      errors.push("Start time cannot be in the past");
+    } else {
+      // Allow appointments that are at least 5 minutes in the future
+      // or in the past (for business owners creating catch-up appointments)
+      const now = new Date();
+      const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000);
+
+      // Only restrict future appointments that are too close (less than 5 minutes)
+      if (startDate > now && startDate < fiveMinutesFromNow) {
+        errors.push("Appointment must be at least 5 minutes in the future");
+      }
     }
   }
 

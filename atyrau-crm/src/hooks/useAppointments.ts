@@ -45,15 +45,17 @@ export function useAppointments(): UseAppointmentsResult {
       setIsCreating(true);
       setCreateError(null);
 
+      const requestBody = {
+        businessId,
+        ...data,
+      };
+
       const response = await fetch("/api/appointments/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          businessId,
-          ...data,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {

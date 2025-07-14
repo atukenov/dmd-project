@@ -36,9 +36,19 @@ export function useServices(): UseServicesResult {
       if (!response.ok) {
         throw new Error(`Failed to fetch services: ${response.statusText}`);
       }
-
       const data = await response.json();
-      setServices(data.services || []);
+
+      // Handle the ApiResponseService structure: { success: true, data: { services: [...] } }
+      if (data.success && data.data && data.data.services !== undefined) {
+        setServices(data.data.services);
+      } else if (data.success === false) {
+        // Handle API error response
+        throw new Error(data.error || "Failed to fetch services");
+      } else {
+        // Fallback for unexpected response structure
+        console.warn("Unexpected API response structure:", data);
+        setServices([]);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch services");
       console.error("Error fetching services:", err);

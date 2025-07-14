@@ -11,7 +11,9 @@ export async function GET(
 ) {
   const authResult = await AuthService.authenticateRequest(request);
   if (!authResult.success || !authResult.user) {
-    return ApiResponseService.unauthorized(authResult.error || "Authentication required");
+    return ApiResponseService.unauthorized(
+      authResult.error || "Authentication required"
+    );
   }
 
   const params = await context.params;
@@ -26,11 +28,15 @@ export async function GET(
     authResult.user._id.toString()
   );
 
-  if (!result.success) {
-    return ApiResponseService.error(result.error!, 400);
+  if (!result.success || !result.data) {
+    return ApiResponseService.error(
+      result.error || "Failed to fetch services",
+      400
+    );
   }
 
-  return ApiResponseService.success(result.data);
+  // Return just the services data, not the nested structure
+  return ApiResponseService.success(result.data.data);
 }
 
 export async function POST(
@@ -39,7 +45,9 @@ export async function POST(
 ) {
   const authResult = await AuthService.authenticateRequest(request);
   if (!authResult.success || !authResult.user) {
-    return ApiResponseService.unauthorized(authResult.error || "Authentication required");
+    return ApiResponseService.unauthorized(
+      authResult.error || "Authentication required"
+    );
   }
 
   const params = await context.params;

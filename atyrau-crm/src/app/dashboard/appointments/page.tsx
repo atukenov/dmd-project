@@ -684,7 +684,9 @@ export default function AppointmentsPage() {
                   {servicesLoading ? (
                     <option disabled>Загрузка услуг...</option>
                   ) : servicesError ? (
-                    <option disabled>Ошибка загрузки услуг</option>
+                    <option disabled>Ошибка загрузки услуг: {servicesError}</option>
+                  ) : services.length === 0 ? (
+                    <option disabled>Услуги не найдены</option>
                   ) : (
                     services.map((service) => (
                       <option key={service.id} value={service.id}>
