@@ -1,6 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb";
-import { getToken } from "next-auth/jwt";
+import { NextRequest } from "next/server";
+import {
+  AuthService,
+  ApiResponseService,
+  DatabaseService,
+} from "@/lib/services";
 import { ObjectId } from "mongodb";
 
 export async function POST(
@@ -11,10 +14,7 @@ export async function POST(
     const clientId = params.id;
 
     if (!clientId) {
-      return NextResponse.json(
-        { message: "Client ID is required" },
-        { status: 400 }
-      );
+      return ApiResponseService.error("Client ID is required", 400);
     }
 
     // Get note data from request body
@@ -22,81 +22,82 @@ export async function POST(
     const { content, type = "general" } = body;
 
     if (!content) {
-      return NextResponse.json(
-        { message: "Note content is required" },
-        { status: 400 }
+      return ApiResponseService.error("Note content is required", 400);
+    }
+
+    // Authenticate user
+    const authResult = await AuthService.authenticateRequest(request);
+    if (!authResult.success || !authResult.user) {
+      return ApiResponseService.unauthorized(
+        authResult.error || "Authentication required"
       );
     }
 
-    // Connect to MongoDB
-    const client = await clientPromise;
-    const db = client.db();
+    const { user } = authResult;
 
-    // Verify user is authorized
-    const token = await getToken({ req: request });
+    // Execute database operation
+    const result = await DatabaseService.executeOperation(async (db) => {
+      // Get client
+      const clientDetails = await db.collection("clients").findOne({
+        _id: new ObjectId(clientId),
+      });
 
-    if (!token) {
-      return NextResponse.json(
-        { message: "Authentication required" },
-        { status: 401 }
-      );
-    }
+      if (!clientDetails) {
+        throw new Error("Client not found");
+      }
 
-    // Get client
-    const clientDetails = await db.collection("clients").findOne({
-      _id: new ObjectId(clientId),
+      // Check if user has permission to add notes for this client
+      const canAccess =
+        user.role === "admin" ||
+        (await AuthService.verifyBusinessOwnership(
+          user,
+          clientDetails.businessId.toString()
+        ));
+
+      if (!canAccess) {
+        throw new Error(
+          "You do not have permission to add notes for this client"
+        );
+      }
+
+      // Create the note
+      const note = {
+        clientId: new ObjectId(clientId),
+        businessId: clientDetails.businessId,
+        content,
+        type, // general, preference, medical, etc.
+        createdAt: new Date(),
+        createdBy: user._id,
+        authorName: user.name || "Staff Member",
+      };
+
+      const insertResult = await db.collection("clientNotes").insertOne(note);
+
+      return {
+        noteId: insertResult.insertedId,
+        note: {
+          ...note,
+          _id: insertResult.insertedId,
+        },
+      };
     });
 
-    if (!clientDetails) {
-      return NextResponse.json(
-        { message: "Client not found" },
-        { status: 404 }
+    if (!result.success) {
+      return ApiResponseService.error(
+        result.error || "Failed to add client note",
+        500
       );
     }
 
-    // Check if user has permission to add notes for this client
-    const user = await db
-      .collection("users")
-      .findOne({ _id: new ObjectId(token.sub) });
-
-    const canAccess =
-      token.role === "admin" ||
-      (user?.businessId &&
-        user.businessId.toString() === clientDetails.businessId.toString());
-
-    if (!canAccess) {
-      return NextResponse.json(
-        { message: "You do not have permission to add notes for this client" },
-        { status: 403 }
-      );
-    }
-
-    // Create the note
-    const note = {
-      clientId: new ObjectId(clientId),
-      businessId: clientDetails.businessId,
-      content,
-      type, // general, preference, medical, etc.
-      createdAt: new Date(),
-      createdBy: new ObjectId(token.sub),
-      authorName: user?.name || "Staff Member",
-    };
-
-    const result = await db.collection("clientNotes").insertOne(note);
-
-    return NextResponse.json({
+    return ApiResponseService.success({
       message: "Note added successfully",
-      noteId: result.insertedId,
-      note: {
-        ...note,
-        _id: result.insertedId,
-      },
+      ...result.data,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error adding client note:", error);
-    return NextResponse.json(
-      { message: "Failed to add client note", error: error.message },
-      { status: 500 }
+    return ApiResponseService.error(
+      error instanceof Error ? error.message : "Failed to add client note",
+      500
     );
   }
 }
@@ -109,68 +110,67 @@ export async function GET(
     const clientId = params.id;
 
     if (!clientId) {
-      return NextResponse.json(
-        { message: "Client ID is required" },
-        { status: 400 }
+      return ApiResponseService.error("Client ID is required", 400);
+    }
+
+    // Authenticate user
+    const authResult = await AuthService.authenticateRequest(request);
+    if (!authResult.success || !authResult.user) {
+      return ApiResponseService.unauthorized(
+        authResult.error || "Authentication required"
       );
     }
 
-    // Connect to MongoDB
-    const client = await clientPromise;
-    const db = client.db();
+    const { user } = authResult;
 
-    // Verify user is authorized
-    const token = await getToken({ req: request });
+    // Execute database operation
+    const result = await DatabaseService.executeOperation(async (db) => {
+      // Get client
+      const clientDetails = await db.collection("clients").findOne({
+        _id: new ObjectId(clientId),
+      });
 
-    if (!token) {
-      return NextResponse.json(
-        { message: "Authentication required" },
-        { status: 401 }
-      );
-    }
+      if (!clientDetails) {
+        throw new Error("Client not found");
+      }
 
-    // Get client
-    const clientDetails = await db.collection("clients").findOne({
-      _id: new ObjectId(clientId),
+      // Check if user has permission to view notes for this client
+      const canAccess =
+        user.role === "admin" ||
+        (await AuthService.verifyBusinessOwnership(
+          user,
+          clientDetails.businessId.toString()
+        ));
+
+      if (!canAccess) {
+        throw new Error(
+          "You do not have permission to view notes for this client"
+        );
+      }
+
+      // Get client's notes
+      const notes = await db
+        .collection("clientNotes")
+        .find({ clientId: new ObjectId(clientId) })
+        .sort({ createdAt: -1 })
+        .toArray();
+
+      return { notes };
     });
 
-    if (!clientDetails) {
-      return NextResponse.json(
-        { message: "Client not found" },
-        { status: 404 }
+    if (!result.success) {
+      return ApiResponseService.error(
+        result.error || "Failed to fetch client notes",
+        500
       );
     }
 
-    // Check if user has permission to view notes for this client
-    const user = await db
-      .collection("users")
-      .findOne({ _id: new ObjectId(token.sub) });
-
-    const canAccess =
-      token.role === "admin" ||
-      (user?.businessId &&
-        user.businessId.toString() === clientDetails.businessId.toString());
-
-    if (!canAccess) {
-      return NextResponse.json(
-        { message: "You do not have permission to view notes for this client" },
-        { status: 403 }
-      );
-    }
-
-    // Get client's notes
-    const notes = await db
-      .collection("clientNotes")
-      .find({ clientId: new ObjectId(clientId) })
-      .sort({ createdAt: -1 })
-      .toArray();
-
-    return NextResponse.json({ notes });
-  } catch (error: any) {
+    return ApiResponseService.success(result.data);
+  } catch (error) {
     console.error("Error fetching client notes:", error);
-    return NextResponse.json(
-      { message: "Failed to fetch client notes", error: error.message },
-      { status: 500 }
+    return ApiResponseService.error(
+      error instanceof Error ? error.message : "Failed to fetch client notes",
+      500
     );
   }
 }

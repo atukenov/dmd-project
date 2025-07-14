@@ -1,63 +1,88 @@
 import { NextRequest } from "next/server";
-import { AuthService, ApiResponseService } from "@/lib/services";
+import {
+  AuthService,
+  ApiResponseService,
+  DatabaseService,
+} from "@/lib/services";
 import { validateServiceData } from "@/lib/utils/validation.utils";
 
 export async function POST(request: NextRequest) {
-  // Get service data from request body
-  const body = await request.json();
-  const { name, duration, price, description, category } = body;
+  try {
+    // Get service data from request body
+    const body = await request.json();
+    const { name, duration, price, description, category } = body;
 
-  // Validate required fields
-  const validation = validateServiceData({
-    name,
-    duration,
-    price,
-    description,
-    category,
-  });
-  if (!validation.isValid) {
-    return ApiResponseService.validationError(validation.errors);
-  }
+    // Validate required fields
+    const validation = validateServiceData({
+      name,
+      duration,
+      price,
+      description,
+      category,
+    });
+    if (!validation.isValid) {
+      return ApiResponseService.validationError(validation.errors);
+    }
 
-  // Authenticate user
-  const authResult = await AuthService.authenticateRequest(request);
-  if (!authResult.success || !authResult.user) {
-    return ApiResponseService.unauthorized("Authentication required");
-  }
+    // Authenticate user
+    const authResult = await AuthService.authenticateRequest(request);
+    if (!authResult.success || !authResult.user) {
+      return ApiResponseService.unauthorized("Authentication required");
+    }
 
-  const { user } = authResult;
+    const { user } = authResult;
 
-  // Get business ID for user
-  const businessId = await AuthService.getBusinessIdForUser(user._id);
-  if (!businessId) {
+    // Get business ID for user
+    const businessId = await AuthService.getBusinessIdForUser(user._id);
+    if (!businessId) {
+      return ApiResponseService.error(
+        "User is not associated with a business",
+        403
+      );
+    }
+
+    // Execute database operation using the established pattern
+    const result = await DatabaseService.executeOperation(async (db) => {
+      // Create the service
+      const service = {
+        businessId: businessId, // Use the fetched businessId
+        name,
+        duration: parseInt(duration.toString(), 10),
+        price: parseFloat(price.toString()),
+        description: description || "",
+        category: category || "default",
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const insertResult = await db.collection("services").insertOne(service);
+
+      return {
+        serviceId: insertResult.insertedId,
+        service: {
+          ...service,
+          _id: insertResult.insertedId,
+        },
+      };
+    });
+
+    if (!result.success) {
+      return ApiResponseService.error(
+        result.error || "Failed to create service",
+        500
+      );
+    }
+
+    return ApiResponseService.success({
+      message: "Service created successfully",
+      ...result.data,
+    });
+  } catch (error) {
+    console.error("Error creating service:", error);
     return ApiResponseService.error(
-      "User is not associated with a business",
-      403
+      error instanceof Error ? error.message : "Failed to create service",
+      500
     );
   }
-
-  // Get database connection
-  const db = await DatabaseService.getDatabase();
-
-  // Create the service
-  const service = {
-    businessId: user.businessId,
-    name,
-    duration: parseInt(duration.toString(), 10),
-    price: parseFloat(price.toString()),
-    description: description || "",
-    category: category || "default",
-    createdAt: new Date(),
-  };
-
-  const result = await db.collection("services").insertOne(service);
-
-  return ApiResponseService.success({
-    message: "Service created successfully",
-    serviceId: result.insertedId,
-    service: {
-      ...service,
-      _id: result.insertedId,
-    },
-  });
 }
