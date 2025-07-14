@@ -2,6 +2,8 @@
  * Validation utilities for forms and API endpoints
  */
 
+import { WorkingHours, Service, Business } from "@/types/models";
+
 /**
  * Email validation regex
  */
@@ -124,13 +126,12 @@ export const validateAppointmentData = (data: {
 /**
  * Validate service data
  */
-export const validateServiceData = (data: {
-  name: string;
-  duration: string | number;
-  price: string | number;
-  description?: string;
-  category?: string;
-}): ValidationResult => {
+export const validateServiceData = (
+  data: Pick<
+    Service,
+    "name" | "duration" | "price" | "description" | "category"
+  >
+): ValidationResult => {
   const errors: string[] = [];
 
   if (!data.name || !data.name.toString().trim()) {
@@ -149,7 +150,7 @@ export const validateServiceData = (data: {
     }
   }
 
-  if (!data.price && data.price !== 0) {
+  if (data.price === undefined || data.price === null) {
     errors.push("Price is required");
   } else {
     const price =
@@ -204,28 +205,18 @@ export const validateAppointmentUpdateData = (data: {
  * Validate business creation data
  */
 export const validateBusinessData = (data: {
-  info?: {
-    name: string;
-    category?: string;
-    description?: string;
+  info?: Pick<Business, "name" | "category" | "description"> & {
     phone?: string;
     email?: string;
   };
-  address?: {
-    street: string;
-    building?: string;
-    city?: string;
-    postalCode?: string;
-    landmark?: string;
-  };
-  services?: Array<{
-    name: string;
-    duration?: number;
-    price?: number;
-    description?: string;
-    category?: string;
-  }>;
-  workingHours?: any[];
+  address?: Pick<
+    Business["address"],
+    "street" | "building" | "city" | "postalCode" | "landmark"
+  >;
+  services?: Array<
+    Pick<Service, "name" | "duration" | "price" | "description" | "category">
+  >;
+  workingHours?: WorkingHours[];
 }): ValidationResult => {
   const errors: string[] = [];
 
@@ -298,7 +289,7 @@ export class ValidationService {
   /**
    * Validate required fields
    */
-  static validateRequired(fields: Record<string, any>): ValidationResult {
+  static validateRequired(fields: Record<string, unknown>): ValidationResult {
     const errors: string[] = [];
 
     for (const [fieldName, value] of Object.entries(fields)) {
@@ -398,12 +389,9 @@ export class ValidationService {
   /**
    * Validate service data
    */
-  static validateService(data: {
-    name: string;
-    duration: number;
-    price: number;
-    description?: string;
-  }): ValidationResult {
+  static validateService(
+    data: Pick<Service, "name" | "duration" | "price" | "description">
+  ): ValidationResult {
     const errors: string[] = [];
 
     // Required fields
@@ -434,13 +422,13 @@ export class ValidationService {
   /**
    * Validate business data
    */
-  static validateBusiness(data: {
-    name: string;
-    description?: string;
-    address: string;
-    phone: string;
-    email?: string;
-  }): ValidationResult {
+  static validateBusiness(
+    data: Pick<Business, "name" | "description"> & {
+      address: string;
+      phone: string;
+      email?: string;
+    }
+  ): ValidationResult {
     const errors: string[] = [];
 
     // Required fields
