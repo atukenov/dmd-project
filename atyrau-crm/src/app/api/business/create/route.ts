@@ -32,14 +32,18 @@ export async function POST(request: NextRequest) {
     user._id.toString(),
     businessData
   );
+
   if (!createResult.success || !createResult.data) {
     return ApiResponseService.error(
       createResult.error || "Failed to create business profile"
     );
   }
 
+  // Extract business ID safely
+  const businessResult = createResult.data as unknown as { businessId: string };
+
   return ApiResponseService.success({
     message: "Business profile created successfully",
-    businessId: createResult.data.businessId,
+    businessId: businessResult.businessId,
   });
 }

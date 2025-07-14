@@ -1,10 +1,159 @@
 import { ObjectId } from "mongodb";
 import { DatabaseService } from "./database.service";
+import { WorkingHours } from "@/types/models";
+
+interface CreateBusinessData {
+  name: string;
+  category: string;
+  description: string;
+  contacts: {
+    phone: string;
+    email: string;
+  };
+  address: {
+    street: string;
+    building: string;
+    city: string;
+    postalCode: string;
+    landmark?: string;
+  };
+  workingHours?: WorkingHours[];
+  socialMedia?: {
+    instagram?: string;
+    facebook?: string;
+    twitter?: string;
+    whatsapp?: string;
+  };
+  photos?: {
+    logo?: string;
+    coverImage?: string;
+    gallery?: string[];
+  };
+  features?: string[];
+  settings?: {
+    appointmentLeadTime?: number;
+    appointmentBuffer?: number;
+    allowCancellation?: boolean;
+    cancellationPeriod?: number;
+    notificationPreferences?: {
+      email?: boolean;
+      sms?: boolean;
+      telegram?: boolean;
+    };
+  };
+  kaspiQrLink?: string;
+  services?: {
+    name: string;
+    description?: string;
+    duration?: number;
+    price?: number;
+    category?: string;
+    image?: string;
+    isActive?: boolean;
+  }[];
+}
 
 /**
  * Service for business-related operations
  */
 export class BusinessService {
+  /**
+   * Create a new business
+   */
+  static async createBusiness(
+    userId: string,
+    businessData: CreateBusinessData
+  ) {
+    return await DatabaseService.executeOperation(async (db) => {
+      // Check if user already has a business
+      const existingBusiness = await db.collection("businesses").findOne({
+        userId: userId,
+      });
+
+      if (existingBusiness) {
+        return {
+          success: false,
+          error: "User already has a business profile",
+        };
+      }
+
+      // Prepare business document
+      const businessDoc = {
+        userId: userId,
+        name: businessData.name,
+        category: businessData.category,
+        description: businessData.description,
+        contacts: {
+          phone: businessData.contacts?.phone || "",
+          email: businessData.contacts?.email || "",
+        },
+        address: {
+          street: businessData.address?.street || "",
+          building: businessData.address?.building || "",
+          city: businessData.address?.city || "",
+          postalCode: businessData.address?.postalCode || "",
+          landmark: businessData.address?.landmark || "",
+        },
+        workingHours: businessData.workingHours || [],
+        socialMedia: businessData.socialMedia || {},
+        photos: businessData.photos || {},
+        features: businessData.features || [],
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        settings: businessData.settings || {
+          appointmentLeadTime: 30,
+          appointmentBuffer: 15,
+          allowCancellation: true,
+          cancellationPeriod: 24,
+          notificationPreferences: {
+            email: true,
+            sms: false,
+            telegram: false,
+          },
+        },
+        kaspiQrLink: businessData.kaspiQrLink || "",
+      };
+
+      // Insert business
+      const businessResult = await db
+        .collection("businesses")
+        .insertOne(businessDoc);
+      const businessId = businessResult.insertedId.toString();
+
+      // Create services if provided
+      if (businessData.services && Array.isArray(businessData.services)) {
+        const serviceDocs = businessData.services.map((service) => ({
+          businessId: businessId,
+          name: service.name,
+          description: service.description || "",
+          duration: service.duration || 60,
+          price: service.price || 0,
+          category: service.category || "General",
+          image: service.image || "",
+          isActive: service.isActive !== false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }));
+
+        if (serviceDocs.length > 0) {
+          await db.collection("services").insertMany(serviceDocs);
+        }
+      }
+
+      return {
+        success: true,
+        data: {
+          businessId: businessId,
+          business: {
+            ...businessDoc,
+            _id: businessResult.insertedId,
+          },
+        },
+      };
+    });
+  }
+
   /**
    * Get business by ID
    */
