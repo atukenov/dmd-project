@@ -32,13 +32,13 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Navigation component handles both desktop and mobile navigation */}
       <Navigation />
 
       {/* Main content */}
-      <div className="md:pl-64 flex flex-col flex-1">
-        <main className="flex-1 pt-16 md:pt-0">
+      <div className="md:pl-64">
+        <main className="pt-16 md:pt-0 pb-16 md:pb-0">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6">{children}</div>
         </main>
       </div>

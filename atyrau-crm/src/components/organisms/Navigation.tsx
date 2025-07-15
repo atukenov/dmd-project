@@ -86,7 +86,7 @@ export const Navigation = () => {
       {/* Mobile menu */}
       <div className="md:hidden">
         {/* Mobile top navigation */}
-        <div className="flex items-center justify-between h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4">
+        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4">
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">Атырау CRM</h1>
           <div className="flex items-center">
             <ThemeToggle />
@@ -110,7 +110,7 @@ export const Navigation = () => {
 
         {/* Mobile menu dropdown */}
         {isMobileMenuOpen && (
-          <div className="bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700">
+          <div className="fixed top-16 left-0 right-0 z-40 bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700">
             <nav className="px-2 pt-2 pb-3 space-y-1">
               {navItems.map((item) => (
                 <Link
@@ -144,9 +144,10 @@ export const Navigation = () => {
       </div>
 
       {/* Bottom navigation for mobile */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
         <div className="flex justify-around">
-          {navItems.slice(0, 5).map((item) => (              <Link
+          {navItems.slice(0, 5).map((item) => (
+            <Link
               key={item.name}
               href={item.href}
               className={`${

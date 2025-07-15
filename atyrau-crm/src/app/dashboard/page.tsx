@@ -118,18 +118,18 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div className="mb-8">
-        <div className='flex items-center justify-between'>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+      <div className="mb-4 sm:mb-8">
+        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4'>
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
             Добро пожаловать, {session?.user?.name || 'пользователь'}!
             </h1>
             {businessName && (
-                <h1 className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-6 py-1 rounded-full text-xl">
-                    💼 {businessName}
-                </h1>
+                <div className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-3 sm:px-6 py-1 rounded-full text-sm sm:text-xl w-fit">
+                    💼 <span className="truncate">{businessName}</span>
+                </div>
             )}
         </div>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+        <p className="mt-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
           Вот сводка вашей деятельности на сегодня
         </p>
       </div>
@@ -156,14 +156,14 @@ export default function Dashboard() {
       ) : (
         <>
           {/* Stats */}
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 sm:gap-5 sm:grid-cols-2 xl:grid-cols-4">
             {/* Today's Appointments */}
             <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
-              <div className="p-5">
+              <div className="p-4 sm:p-5">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-blue-500 rounded-md p-3">
+                  <div className="flex-shrink-0 bg-blue-500 rounded-md p-2 sm:p-3">
                     <svg
-                      className="h-6 w-6 text-white"
+                      className="h-4 w-4 sm:h-6 sm:w-6 text-white"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -177,13 +177,13 @@ export default function Dashboard() {
                       />
                     </svg>
                   </div>
-                  <div className="ml-5 w-0 flex-1">
+                  <div className="ml-3 sm:ml-5 w-0 flex-1 min-w-0">
                     <dl>
-                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                      <dt className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
                         Записей сегодня
                       </dt>
                       <dd>
-                        <div className="text-lg font-bold text-gray-900 dark:text-white">
+                        <div className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
                           {stats.appointmentsToday}
                         </div>
                       </dd>
@@ -191,8 +191,8 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 dark:bg-gray-700 px-5 py-3">
-                <div className="text-sm">
+              <div className="bg-gray-50 dark:bg-gray-700 px-4 sm:px-5 py-2 sm:py-3">
+                <div className="text-xs sm:text-sm">
                   <Link
                     href="/dashboard/appointments"
                     className="font-medium text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
@@ -205,11 +205,11 @@ export default function Dashboard() {
 
             {/* Weekly Appointments */}
             <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
-              <div className="p-5">
+              <div className="p-4 sm:p-5">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-green-500 rounded-md p-3">
+                  <div className="flex-shrink-0 bg-green-500 rounded-md p-2 sm:p-3">
                     <svg
-                      className="h-6 w-6 text-white"
+                      className="h-4 w-4 sm:h-6 sm:w-6 text-white"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -223,13 +223,13 @@ export default function Dashboard() {
                       />
                     </svg>
                   </div>
-                  <div className="ml-5 w-0 flex-1">
+                  <div className="ml-3 sm:ml-5 w-0 flex-1 min-w-0">
                     <dl>
-                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                      <dt className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
                         Записей на неделю
                       </dt>
                       <dd>
-                        <div className="text-lg font-bold text-gray-900 dark:text-white">
+                        <div className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
                           {stats.appointmentsWeek}
                         </div>
                       </dd>
@@ -237,8 +237,8 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 dark:bg-gray-700 px-5 py-3">
-                <div className="text-sm">
+              <div className="bg-gray-50 dark:bg-gray-700 px-4 sm:px-5 py-2 sm:py-3">
+                <div className="text-xs sm:text-sm">
                   <Link
                     href="/dashboard/appointments"
                     className="font-medium text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
@@ -251,11 +251,11 @@ export default function Dashboard() {
 
             {/* Total Clients */}
             <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
-              <div className="p-5">
+              <div className="p-4 sm:p-5">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-purple-500 rounded-md p-3">
+                  <div className="flex-shrink-0 bg-purple-500 rounded-md p-2 sm:p-3">
                     <svg
-                      className="h-6 w-6 text-white"
+                      className="h-4 w-4 sm:h-6 sm:w-6 text-white"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -269,13 +269,13 @@ export default function Dashboard() {
                       />
                     </svg>
                   </div>
-                  <div className="ml-5 w-0 flex-1">
+                  <div className="ml-3 sm:ml-5 w-0 flex-1 min-w-0">
                     <dl>
-                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                      <dt className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
                         Всего клиентов
                       </dt>
                       <dd>
-                        <div className="text-lg font-bold text-gray-900 dark:text-white">
+                        <div className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
                           {stats.clientsTotal}
                         </div>
                       </dd>
@@ -283,8 +283,8 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 dark:bg-gray-700 px-5 py-3">
-                <div className="text-sm">
+              <div className="bg-gray-50 dark:bg-gray-700 px-4 sm:px-5 py-2 sm:py-3">
+                <div className="text-xs sm:text-sm">
                   <Link
                     href="/dashboard/clients"
                     className="font-medium text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
@@ -297,11 +297,11 @@ export default function Dashboard() {
 
             {/* Revenue */}
             <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
-              <div className="p-5">
+              <div className="p-4 sm:p-5">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+                  <div className="flex-shrink-0 bg-yellow-500 rounded-md p-2 sm:p-3">
                     <svg
-                      className="h-6 w-6 text-white"
+                      className="h-4 w-4 sm:h-6 sm:w-6 text-white"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -315,13 +315,13 @@ export default function Dashboard() {
                       />
                     </svg>
                   </div>
-                  <div className="ml-5 w-0 flex-1">
+                  <div className="ml-3 sm:ml-5 w-0 flex-1 min-w-0">
                     <dl>
-                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                      <dt className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
                         Доход за месяц
                       </dt>
                       <dd>
-                        <div className="text-lg font-bold text-gray-900 dark:text-white">
+                        <div className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
                           {stats.revenue.toLocaleString()} ₸
                         </div>
                       </dd>
@@ -329,8 +329,8 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 dark:bg-gray-700 px-5 py-3">
-                <div className="text-sm">
+              <div className="bg-gray-50 dark:bg-gray-700 px-4 sm:px-5 py-2 sm:py-3">
+                <div className="text-xs sm:text-sm">
                   <Link
                     href="/dashboard/payments"
                     className="font-medium text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
@@ -343,14 +343,14 @@ export default function Dashboard() {
           </div>
 
           {/* Recent Appointments */}
-          <div className="mt-8">
-            <h2 className="text-lg font-medium text-gray-900 dark:text-white">
+          <div className="mt-6 sm:mt-8">
+            <h2 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-3 sm:mb-4">
               Ближайшие записи
             </h2>
-            <div className="mt-4 bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
+            <div className="bg-white dark:bg-gray-800 shadow overflow-hidden rounded-lg">
               {recentAppointments.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-gray-500 dark:text-gray-400">
+                <div className="text-center py-8 sm:py-12 px-4">
+                  <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">
                     Нет запланированных записей на ближайшие дни
                   </p>
                 </div>
@@ -359,13 +359,13 @@ export default function Dashboard() {
                   {recentAppointments.map((appointment) => (
                     <li key={appointment._id}>
                       <div className="block hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <div className="px-4 py-4 sm:px-6">
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm font-medium text-blue-600 dark:text-blue-400 truncate">
+                        <div className="px-3 py-3 sm:px-6 sm:py-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+                            <p className="text-sm font-medium text-blue-600 dark:text-blue-400 truncate mb-2 sm:mb-0">
                               {appointment.client.name}
                             </p>
-                            <div className="ml-2 flex-shrink-0 flex">
-                              <p className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            <div className="flex-shrink-0">
+                              <p className={`px-2 py-1 inline-flex text-xs leading-4 font-semibold rounded-full ${
                                 appointment.status === 'scheduled' 
                                   ? 'bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100'
                                   : appointment.status === 'confirmed'
@@ -377,14 +377,14 @@ export default function Dashboard() {
                               </p>
                             </div>
                           </div>
-                          <div className="mt-2 sm:flex sm:justify-between">
-                            <div className="sm:flex">
-                              <p className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                          <div className="mt-2 flex flex-col sm:flex-row sm:justify-between space-y-2 sm:space-y-0">
+                            <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-6">
+                              <p className="flex items-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                                 {appointment.service.name}
                               </p>
-                              <p className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400 sm:mt-0 sm:ml-6">
+                              <p className="flex items-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                                 <svg
-                                  className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
+                                  className="flex-shrink-0 mr-1.5 h-4 w-4 sm:h-5 sm:w-5 text-gray-400"
                                   xmlns="http://www.w3.org/2000/svg"
                                   viewBox="0 0 20 20"
                                   fill="currentColor"
@@ -398,9 +398,9 @@ export default function Dashboard() {
                                 {appointment.service.duration} мин
                               </p>
                             </div>
-                            <div className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400 sm:mt-0">
+                            <div className="flex items-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                               <svg
-                                className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
+                                className="flex-shrink-0 mr-1.5 h-4 w-4 sm:h-5 sm:w-5 text-gray-400"
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 20 20"
                                 fill="currentColor"
