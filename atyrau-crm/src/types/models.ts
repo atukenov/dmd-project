@@ -97,6 +97,29 @@ export interface WorkingHours {
 }
 
 /**
+ * Represents a client
+ */
+export interface Client {
+  _id?: ObjectId;
+  userId?: ObjectId;
+  businessId: ObjectId;
+  name: string;
+  phone: string;
+  email?: string;
+  notes?: string;
+  tags?: string[];
+  preferences?: {
+    preferredTime?: string;
+    communicationMethod?: "phone" | "email" | "telegram" | "whatsapp";
+  };
+  totalVisits?: number;
+  totalSpent?: number;
+  lastVisit?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
  * Represents a client appointment
  */
 export interface Appointment {
@@ -133,4 +156,3 @@ export interface Payment {
   createdAt: Date;
   updatedAt: Date;
 }
-

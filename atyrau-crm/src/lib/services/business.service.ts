@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { DatabaseService } from "./database.service";
-import { WorkingHours } from "@/types/models";
+import { Client, WorkingHours } from "@/types/models";
 
 interface CreateBusinessData {
   name: string;
@@ -239,8 +239,9 @@ export class BusinessService {
   ) {
     return await DatabaseService.executeOperation(async (db) => {
       // First, try to find existing client by phone and business
-      const client = await db.collection("clients").findOne({
+      const client = await db.collection<Client>("clients").findOne({
         businessId: new ObjectId(businessId),
+        name: clientData.name,
         phone: clientData.phone,
       });
 

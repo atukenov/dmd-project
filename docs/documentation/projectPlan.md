@@ -364,6 +364,7 @@ MVP Release: October 2025
 2. Advanced analytics
 3. Multi-language support
 4. Mobile app
+5. Restaurant and Coffee Table Reservation Map
 
 ## ⚙️ Technical Milestones
 
