@@ -4,15 +4,21 @@ import { ObjectId } from "mongodb";
  * Represents a user in the system
  */
 export interface User {
-  id?: string;
+  _id?: ObjectId;
   name: string;
   email: string;
-  password?: string; // Hashed with bcrypt
+  phone?: string;
+  passwordHash?: string; // Hashed with bcrypt
   role: "admin" | "business" | "client";
-  emailVerified?: Date;
+  isEmailVerified?: boolean;
+  emailVerified?: Date; // Keep for backward compatibility
+  verificationToken?: string;
+  verificationTokenExpiry?: Date;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
   image?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 /**

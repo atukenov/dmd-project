@@ -73,7 +73,7 @@ export const authOptions: NextAuthOptions = {
             name: user.name,
             email: user.email,
             role: user.role,
-            emailVerified: user.emailVerified,
+            emailVerified: user.isEmailVerified ? new Date() : undefined,
           };
         } catch (error) {
           console.error("Auth error:", error);
@@ -94,7 +94,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role || "client";
-        token.emailVerified = user.emailVerified;
+        token.emailVerified = user.emailVerified || undefined;
       }
       return token;
     },
