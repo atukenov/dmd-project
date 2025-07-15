@@ -216,7 +216,7 @@ export class ClientService {
 
       // Build query filter
       const filter: Record<string, unknown> = {
-        businessId: businessId,
+        businessId: new ObjectId(businessId), // Convert string to ObjectId
       };
 
       if (query) {
@@ -296,14 +296,11 @@ export class ClientService {
       );
 
       return {
-        success: true,
-        data: {
-          clients: clientsWithStats,
-          total: totalClients,
-          page: Math.floor(skip / limit) + 1,
-          limit,
-          totalPages: Math.ceil(totalClients / limit),
-        },
+        clients: clientsWithStats,
+        total: totalClients,
+        page: Math.floor(skip / limit) + 1,
+        limit,
+        totalPages: Math.ceil(totalClients / limit),
       };
     });
   }

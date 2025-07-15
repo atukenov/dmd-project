@@ -53,11 +53,13 @@ export async function GET(request: NextRequest) {
     skip,
   });
 
+  // DatabaseService.executeOperation wraps response with { success, data }
   if (!clientsResult.success) {
     return ApiResponseService.error(
       clientsResult.error || "Failed to fetch clients"
     );
   }
 
+  // Return the unwrapped data
   return ApiResponseService.success(clientsResult.data);
 }

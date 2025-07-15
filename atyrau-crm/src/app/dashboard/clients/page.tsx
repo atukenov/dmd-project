@@ -54,7 +54,21 @@ export default function ClientsPage() {
         throw new Error('Failed to fetch clients');
       }
       
-      const data = await response.json();
+      const result = await response.json();
+      
+      // Debug logging
+      console.log('API Response:', result);
+      
+      // Check if the API call was successful
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to fetch clients');
+      }
+      
+      // Extract the data from the API response
+      const data = result.data;
+      console.log('Extracted data:', data);
+      console.log('Clients array:', data.clients);
+      
       setClients(data.clients || []);
       setTotalPages(data.totalPages || 1);
       setTotalClients(data.total || 0);
