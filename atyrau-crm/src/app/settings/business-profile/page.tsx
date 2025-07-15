@@ -376,14 +376,14 @@ export default function BusinessProfileSetup() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label className="block text-sm font-medium text-text mb-1">
           Категория
         </label>
         <select
           name="category"
           value={businessInfo.category}
           onChange={handleBusinessInfoChange}
-          className="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
+          className="block w-full rounded-md border-input-border bg-input-bg text-text shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:text-sm p-2.5 transition-colors"
           required
         >
           <option value="">Выберите категорию</option>
@@ -396,7 +396,7 @@ export default function BusinessProfileSetup() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label className="block text-sm font-medium text-text mb-1">
           Описание
         </label>
         <textarea
@@ -404,7 +404,7 @@ export default function BusinessProfileSetup() {
           value={businessInfo.description}
           onChange={handleBusinessInfoChange}
           rows={3}
-          className="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
+          className="block w-full rounded-md border-input-border bg-input-bg text-text shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:text-sm p-2.5 transition-colors"
           placeholder="Расскажите о своем бизнесе"
         />
       </div>
@@ -484,7 +484,7 @@ export default function BusinessProfileSetup() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label className="block text-sm font-medium text-text mb-1">
           Ориентир
         </label>
         <textarea
@@ -492,16 +492,19 @@ export default function BusinessProfileSetup() {
           value={address.landmark}
           onChange={handleAddressChange}
           rows={2}
-          className="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
+          className="block w-full rounded-md border-input-border bg-input-bg text-text shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:text-sm p-2.5 transition-colors"
           placeholder="Например: Напротив ТРЦ 'Атырау'"
         />
       </div>
 
       {/* Map placeholder - would integrate with Google Maps or similar */}
-      <div className="mt-4 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-100 dark:bg-gray-800 h-64 flex items-center justify-center">
-        <p className="text-gray-500 dark:text-gray-400">
-          Карта будет доступна в ближайшем обновлении
-        </p>
+      <div className="mt-4 border border-card-border rounded-lg bg-card-muted h-64 flex items-center justify-center">
+        <div className="text-center">
+          <span className="text-3xl block mb-2">🗺️</span>
+          <p className="text-text-muted">
+            Карта будет доступна в ближайшем обновлении
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -509,21 +512,21 @@ export default function BusinessProfileSetup() {
   const renderServicesStep = () => (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-700">Услуги</h3>
+        <h3 className="text-lg font-medium text-heading">Услуги</h3>
         <Button variant="secondary" onClick={addService} type="button">
           + Добавить услугу
         </Button>
       </div>
 
       {services.map((service, index) => (
-        <div key={service.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+        <div key={service.id} className="border border-card-border rounded-lg p-4 bg-card-muted">
           <div className="flex justify-between items-center mb-4">
-            <h4 className="font-medium text-gray-700">Услуга #{index + 1}</h4>
+            <h4 className="font-medium text-text">Услуга #{index + 1}</h4>
             {services.length > 1 && (
               <button
                 type="button"
                 onClick={() => removeService(index)}
-                className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                className="text-error hover:text-error/80 font-medium transition-colors"
               >
                 Удалить
               </button>
@@ -571,14 +574,14 @@ export default function BusinessProfileSetup() {
           </div>
 
           <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-text-primary mb-1">
               Описание услуги
             </label>
             <textarea
               value={service.description}
               onChange={(e) => handleServiceChange(index, 'description', e.target.value)}
               rows={2}
-              className="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5"
+              className="block w-full rounded-md border-input-border bg-input-bg shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:text-sm p-2.5 text-text-primary placeholder-text-muted transition-colors"
               placeholder="Опишите услугу"
             />
           </div>
@@ -610,9 +613,9 @@ export default function BusinessProfileSetup() {
                 id={`${day.id}-open`}
                 checked={workingHours[day.id as keyof typeof workingHours].isOpen}
                 onChange={(e) => handleWorkingHoursChange(day.id, 'isOpen', e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-primary focus:ring-primary/20 border-input-border rounded"
               />
-              <label htmlFor={`${day.id}-open`} className="ml-2 block text-sm text-gray-900 dark:text-gray-700">
+              <label htmlFor={`${day.id}-open`} className="ml-2 block text-sm text-text-primary">
                 {day.name}
               </label>
             </div>
@@ -622,7 +625,7 @@ export default function BusinessProfileSetup() {
                 value={workingHours[day.id as keyof typeof workingHours].from}
                 onChange={(e) => handleWorkingHoursChange(day.id, 'from', e.target.value)}
                 disabled={!workingHours[day.id as keyof typeof workingHours].isOpen}
-                className="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm disabled:bg-gray-100 disabled:dark:bg-gray-700 disabled:text-gray-500 disabled:dark:text-gray-400"
+                className="block w-full rounded-md border-input-border bg-input-bg shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:text-sm disabled:bg-card-muted disabled:text-text-muted text-text-primary transition-colors"
               >
                 {Array.from({ length: 24 }).map((_, i) => (
                   <option key={i} value={`${String(i).padStart(2, '0')}:00`}>
@@ -631,13 +634,13 @@ export default function BusinessProfileSetup() {
                 ))}
               </select>
               
-              <span className="text-gray-500">до</span>
+              <span className="text-text-muted">до</span>
               
               <select
                 value={workingHours[day.id as keyof typeof workingHours].to}
                 onChange={(e) => handleWorkingHoursChange(day.id, 'to', e.target.value)}
                 disabled={!workingHours[day.id as keyof typeof workingHours].isOpen}
-                className="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm disabled:bg-gray-100 disabled:dark:bg-gray-700 disabled:text-gray-500 disabled:dark:text-gray-400"
+                className="block w-full rounded-md border-input-border bg-input-bg shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 sm:text-sm disabled:bg-card-muted disabled:text-text-muted text-text-primary transition-colors"
               >
                 {Array.from({ length: 24 }).map((_, i) => (
                   <option key={i} value={`${String(i).padStart(2, '0')}:00`}>
@@ -655,53 +658,53 @@ export default function BusinessProfileSetup() {
   const renderPhotosStep = () => (
     <div className="space-y-6">
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-600 mb-2">
+        <label className="block text-sm font-medium text-text-primary mb-2">
           Логотип
         </label>
         <div className="mt-1 flex items-center">
-          <div className="h-24 w-24 rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 flex justify-center items-center overflow-hidden">
-            <svg className="h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="h-24 w-24 rounded-md border border-card-border bg-card-muted flex justify-center items-center overflow-hidden">
+            <svg className="h-12 w-12 text-text-muted" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
           <div className="ml-4">
             <Button variant="secondary" type="button">Загрузить</Button>
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG или JPG, квадратное изображение</p>
+            <p className="mt-1 text-xs text-text-muted">PNG или JPG, квадратное изображение</p>
           </div>
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-600 mb-2">
+        <label className="block text-sm font-medium text-text-primary mb-2">
           Обложка
         </label>
         <div className="mt-1 flex items-center">
-          <div className="h-32 w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 flex justify-center items-center">
-            <svg className="h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="h-32 w-full rounded-md border border-card-border bg-card-muted flex justify-center items-center">
+            <svg className="h-12 w-12 text-text-muted" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
         </div>
         <div className="mt-2">
           <Button variant="secondary" type="button">Загрузить</Button>
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG или JPG, рекомендуемый размер 1200×300px</p>
+          <p className="mt-1 text-xs text-text-muted">PNG или JPG, рекомендуемый размер 1200×300px</p>
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-600 mb-2">
+        <label className="block text-sm font-medium text-text-primary mb-2">
           Фотогалерея
         </label>
         <div className="mt-1 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
           {Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="relative h-24 w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 flex justify-center items-center">
-              <svg className="h-8 w-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div key={index} className="relative h-24 w-full rounded-md border border-card-border bg-card-muted flex justify-center items-center hover:bg-input-bg transition-colors cursor-pointer">
+              <svg className="h-8 w-8 text-text-muted" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
             </div>
           ))}
         </div>
-        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Добавьте фотографии вашего бизнеса (до 8 фото)</p>
+        <p className="mt-2 text-xs text-text-muted">Добавьте фотографии вашего бизнеса (до 8 фото)</p>
       </div>
     </div>
   );
@@ -709,13 +712,13 @@ export default function BusinessProfileSetup() {
   const renderConfirmationStep = () => (
     <div className="space-y-6">
       <div className="text-center pb-6">
-        <svg className="mx-auto h-16 w-16 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <svg className="mx-auto h-16 w-16 text-success" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-gray-700">
+        <h3 className="mt-2 text-lg font-medium text-heading">
           {businessId ? 'Готово к обновлению!' : 'Все готово!'}
         </h3>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-1 text-sm text-text-muted">
           {businessId 
             ? 'Проверьте обновленную информацию ниже перед сохранением изменений'
             : 'Проверьте информацию ниже перед созданием профиля бизнеса'
@@ -723,23 +726,23 @@ export default function BusinessProfileSetup() {
         </p>
       </div>
 
-      <div className="border-t border-b border-gray-200 dark:border-gray-700 py-4">
-        <dl className="divide-y divide-gray-200 dark:divide-gray-700">
+      <div className="border-t border-b border-card-border py-4">
+        <dl className="divide-y divide-card-border">
           <div className="py-3 grid grid-cols-3 gap-4">
-            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Название</dt>
-            <dd className="text-sm text-gray-900 dark:text-gray-700 col-span-2">{businessInfo.name}</dd>
+            <dt className="text-sm font-medium text-text-muted">Название</dt>
+            <dd className="text-sm text-text-primary col-span-2">{businessInfo.name}</dd>
           </div>
 
           <div className="py-3 grid grid-cols-3 gap-4">
-            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Категория</dt>
-            <dd className="text-sm text-gray-900 dark:text-gray-700 col-span-2">
+            <dt className="text-sm font-medium text-text-muted">Категория</dt>
+            <dd className="text-sm text-text-primary col-span-2">
               {BUSINESS_CATEGORIES.find(c => c.id === businessInfo.category)?.name || ''}
             </dd>
           </div>
 
           <div className="py-3 grid grid-cols-3 gap-4">
-            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Контакты</dt>
-            <dd className="text-sm text-gray-900 dark:text-gray-700 col-span-2">
+            <dt className="text-sm font-medium text-text-muted">Контакты</dt>
+            <dd className="text-sm text-text-primary col-span-2">
               {businessInfo.phone && <div>{businessInfo.phone}</div>}
               {businessInfo.email && <div>{businessInfo.email}</div>}
             </dd>
@@ -798,13 +801,16 @@ export default function BusinessProfileSetup() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+    <div className="min-h-screen bg-app-bg py-12">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <div className="mb-4">
+            <span className="text-4xl">💎</span>
+          </div>
+          <h1 className="text-3xl font-bold text-heading">
             {businessId ? 'Редактирование бизнеса' : 'Настройка бизнеса'}
           </h1>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-1 text-sm text-text-muted">
             {businessId 
               ? 'Обновите информацию о вашем бизнесе'
               : 'Заполните информацию о вашем бизнесе, чтобы начать принимать клиентов'
@@ -817,8 +823,8 @@ export default function BusinessProfileSetup() {
           <Card className="overflow-hidden">
             <div className="px-4 py-5 sm:p-6">
               <div className="flex justify-center items-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-                <span className="ml-4 text-gray-600 dark:text-gray-400">Загрузка данных бизнеса...</span>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                <span className="ml-4 text-text-muted">Загрузка данных бизнеса...</span>
               </div>
             </div>
           </Card>
@@ -826,8 +832,8 @@ export default function BusinessProfileSetup() {
           <>
             {/* No business notice */}
             {!businessId && (
-              <div className="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-6">
-                <p className="text-blue-700 dark:text-blue-400">
+              <div className="bg-info/10 border-l-4 border-info p-4 mb-6 rounded-r-md">
+                <p className="text-info-dark">
                   <strong>Создание нового бизнеса:</strong> Заполните все шаги для создания профиля вашего бизнеса.
                 </p>
               </div>
@@ -840,16 +846,16 @@ export default function BusinessProfileSetup() {
               <li key={step.id} className={`relative ${stepIdx !== steps.length - 1 ? 'pr-8' : ''}`}>
                 {stepIdx !== steps.length - 1 ? (
                   <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div className="h-0.5 w-full bg-gray-200 dark:bg-gray-700"></div>
+                    <div className="h-0.5 w-full bg-card-border"></div>
                   </div>
                 ) : null}
                 <div
-                  className={`relative flex h-8 w-8 items-center justify-center rounded-full ${
+                  className={`relative flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
                     step.id === currentStep
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-primary text-white'
                       : steps.findIndex(s => s.id === currentStep) > steps.findIndex(s => s.id === step.id)
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300'
+                      ? 'bg-success text-white'
+                      : 'bg-card-muted text-text-muted border border-card-border'
                   }`}
                 >
                   {steps.findIndex(s => s.id === currentStep) > steps.findIndex(s => s.id === step.id) ? (
@@ -860,6 +866,11 @@ export default function BusinessProfileSetup() {
                     <span>{stepIdx + 1}</span>
                   )}
                 </div>
+                <p className={`mt-2 text-xs font-medium ${
+                  step.id === currentStep ? 'text-primary' : 'text-text-muted'
+                }`}>
+                  {step.name}
+                </p>
               </li>
             ))}
           </ol>
@@ -869,8 +880,8 @@ export default function BusinessProfileSetup() {
         <Card className="overflow-hidden">
           <div className="px-4 py-5 sm:p-6">
             {error && (
-              <div className="bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 p-4 mb-6">
-                <p className="text-red-700 dark:text-red-400">{error}</p>
+              <div className="bg-error/10 border-l-4 border-error p-4 mb-6 rounded-r-md">
+                <p className="text-error font-medium">{error}</p>
               </div>
             )}
 

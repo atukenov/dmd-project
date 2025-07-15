@@ -217,7 +217,10 @@ export default function ServicesPage() {
   return (
     <div className="max-w-6xl mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold dark:text-white">Управление услугами</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-heading">Управление услугами</h1>
+          <p className="text-text-muted mt-1">Управляйте услугами вашего бизнеса</p>
+        </div>
         <Button
           onClick={handleAddService}
           variant="primary"
@@ -233,14 +236,19 @@ export default function ServicesPage() {
       </div>
 
       {!businessId ? (
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 dark:bg-yellow-900 dark:border-yellow-600 dark:text-yellow-200">
-          <p className="font-bold">Внимание!</p>
-          <p>Бизнес не выбран. Пожалуйста, выберите или создайте бизнес в настройках.</p>
+        <div className="bg-warning/10 border-l-4 border-warning text-warning-dark p-4 mb-6 rounded-r-md">
+          <div className="flex items-center">
+            <span className="text-2xl mr-3">⚠️</span>
+            <div>
+              <p className="font-bold">Внимание!</p>
+              <p>Бизнес не выбран. Пожалуйста, выберите или создайте бизнес в настройках.</p>
+            </div>
+          </div>
         </div>
       ) : (
         <>
           {/* Filters */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
+          <div className="bg-content-bg rounded-lg shadow-card border border-card-border p-4 mb-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Search */}
               <SearchInput
@@ -257,7 +265,7 @@ export default function ServicesPage() {
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full px-3 py-2 border border-input-border bg-input-bg text-text rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
                 >
                   <option value="">Все категории</option>
                   {categories.map(category => (
@@ -273,9 +281,9 @@ export default function ServicesPage() {
                   id="show-inactive"
                   checked={showInactiveServices}
                   onChange={() => setShowInactiveServices(!showInactiveServices)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-primary focus:ring-primary/20 focus:ring-2 border-input-border rounded"
                 />
-                <label htmlFor="show-inactive" className="ml-2 block text-sm text-gray-900 dark:text-white">
+                <label htmlFor="show-inactive" className="ml-2 block text-sm text-text-body">
                   Показать неактивные услуги
                 </label>
               </div>
@@ -283,10 +291,10 @@ export default function ServicesPage() {
           </div>
 
           {/* Services List */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+          <div className="bg-content-bg rounded-lg shadow-card border border-card-border overflow-hidden">
             {loading ? (
               <div className="flex justify-center items-center h-64">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8 text-blue-500 animate-spin">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8 text-primary animate-spin">
                   <line x1="12" y1="2" x2="12" y2="6"></line>
                   <line x1="12" y1="18" x2="12" y2="22"></line>
                   <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
@@ -298,28 +306,29 @@ export default function ServicesPage() {
                 </svg>
               </div>
             ) : error ? (
-              <div className="flex flex-col items-center justify-center h-64 text-red-500">
+              <div className="flex flex-col items-center justify-center h-64 text-error">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-12 w-12 mb-2">
                   <circle cx="12" cy="12" r="10"></circle>
                   <line x1="12" y1="8" x2="12" y2="12"></line>
                   <line x1="12" y1="16" x2="12.01" y2="16"></line>
                 </svg>
-                <p>{error}</p>
+                <p className="font-medium">{error}</p>
               </div>
             ) : filteredServices.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-64 text-gray-500 dark:text-gray-400">
-                <p className="text-lg">Нет услуг для отображения</p>
+              <div className="flex flex-col items-center justify-center h-64 text-text-muted">
+                <span className="text-4xl mb-4">📋</span>
+                <p className="text-lg font-medium text-text">Нет услуг для отображения</p>
                 <p className="text-sm mt-1">Добавьте новую услугу, нажав кнопку «Добавить услугу»</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-700">
+                <table className="min-w-full divide-y divide-table-border">
+                  <thead className="bg-table-header-bg">
                     <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-table-header-text uppercase tracking-wider">
                         Название
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-table-header-text uppercase tracking-wider">
                         Категория
                       </th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">

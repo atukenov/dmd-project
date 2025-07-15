@@ -18,27 +18,33 @@ export default function PaymentsPage() {
     <div className="px-4 sm:px-6 lg:px-8 py-8">
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Payments</h1>
-          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-            Manage and track all payment transactions for your business.
+          <h1 className="text-2xl font-semibold text-heading">Платежи</h1>
+          <p className="mt-2 text-sm text-text-muted">
+            Управляйте и отслеживайте все платежные транзакции вашего бизнеса.
           </p>
         </div>
       </div>
       
       {isLoading ? (
         <div className="mt-6 flex justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
       ) : (
         <div className="mt-8 flex flex-col">
-          <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg p-6">
-            <div className="border border-gray-200 dark:border-gray-700 rounded-md p-4">
-              <p className="text-center text-gray-500 dark:text-gray-400">
-                The payments feature is coming soon in our next update.
-              </p>
-              <p className="text-center text-gray-500 dark:text-gray-400 mt-2">
-                This section will allow you to track Kaspi QR payments, view payment history, and handle refunds.
-              </p>
+          <div className="bg-content-bg shadow-card overflow-hidden sm:rounded-lg p-6 border border-card-border">
+            <div className="border border-card-border rounded-md p-6 bg-card-muted">
+              <div className="text-center">
+                <span className="text-4xl mb-4 block">💎</span>
+                <h3 className="text-lg font-medium text-heading mb-2">
+                  Система платежей в разработке
+                </h3>
+                <p className="text-text-body mb-4">
+                  Функция платежей скоро появится в нашем следующем обновлении.
+                </p>
+                <p className="text-text-muted">
+                  Этот раздел позволит отслеживать платежи Kaspi QR, просматривать историю платежей и обрабатывать возвраты.
+                </p>
+              </div>
             </div>
           </div>
         </div>

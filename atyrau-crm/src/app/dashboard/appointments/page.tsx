@@ -431,24 +431,30 @@ export default function AppointmentsPage() {
 
   return (
     <div className="max-w-6xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6 dark:text-white">
-        Управление записями
-      </h1>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-heading">Управление записями</h1>
+        <p className="text-text-muted mt-1">Просматривайте и управляйте записями клиентов</p>
+      </div>
 
       {!businessId && (
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 dark:bg-yellow-900 dark:border-yellow-600 dark:text-yellow-200">
-          <p className="font-bold">Внимание!</p>
-          <p>
-            Бизнес не выбран. Пожалуйста, выберите или создайте бизнес в
-            настройках.
-          </p>
+        <div className="bg-warning/10 border-l-4 border-warning text-warning-dark p-4 mb-6 rounded-r-md">
+          <div className="flex items-center">
+            <span className="text-2xl mr-3">⚠️</span>
+            <div>
+              <p className="font-bold">Внимание!</p>
+              <p>
+                Бизнес не выбран. Пожалуйста, выберите или создайте бизнес в
+                настройках.
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Calendar */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-          <h2 className="text-lg font-semibold mb-3 dark:text-white">
+        <div className="bg-content-bg rounded-lg shadow-card border border-card-border p-4">
+          <h2 className="text-lg font-semibold mb-3 text-heading">
             Выберите дату
           </h2>
           <Calendar
@@ -458,34 +464,34 @@ export default function AppointmentsPage() {
         </div>
 
         {/* Appointments List */}
-        <div className="md:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+        <div className="md:col-span-2 bg-content-bg rounded-lg shadow-card border border-card-border p-4">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold dark:text-white">
+            <h2 className="text-xl font-semibold text-heading">
               Записи на {formatDate(selectedDate)}
             </h2>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-sm text-text-muted">
               Нажмите на свободное время чтобы создать запись
             </div>
           </div>
 
           {isLoading ? (
             <div className="flex justify-center p-8">
-              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
             </div>
           ) : error ? (
-            <div className="text-red-500 p-4 text-center">{error}</div>
+            <div className="text-error p-4 text-center font-medium">{error}</div>
           ) : (
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {timeSlots.map((slot) => (
                 <div
                   key={slot.time}
-                  className="border border-gray-200 dark:border-gray-700 rounded-md"
+                  className="border border-card-border rounded-md"
                 >
                   {/* Time Slot Header */}
                   <div
-                    className={`bg-gray-50 dark:bg-gray-700 px-4 py-2 border-b border-gray-200 dark:border-gray-600 ${
+                    className={`bg-card-muted px-4 py-2 border-b border-card-border ${
                       slot.appointments.length === 0
-                        ? "cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-800/30 transition-colors"
+                        ? "cursor-pointer hover:bg-hover-bg transition-colors"
                         : ""
                     }`}
                     onClick={
@@ -648,8 +654,8 @@ export default function AppointmentsPage() {
       {/* New Appointment Form Modal */}
       {showNewAppointmentForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4 dark:text-white">
+          <div className="bg-content-bg rounded-lg max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto shadow-modal border border-card-border">
+            <h2 className="text-xl font-bold mb-4 text-heading">
               Создать новую запись
             </h2>
 
@@ -658,7 +664,7 @@ export default function AppointmentsPage() {
               <div>
                 <label
                   htmlFor="serviceId"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  className="block text-sm font-medium text-text mb-1"
                 >
                   Услуга *
                 </label>
@@ -668,7 +674,7 @@ export default function AppointmentsPage() {
                   value={newAppointmentData.serviceId}
                   onChange={handleAppointmentFormChange}
                   required
-                  className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="w-full p-2 border border-input-border bg-input-bg text-text rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
                 >
                   <option value="">Выберите услугу</option>
                   {servicesLoading ? (
