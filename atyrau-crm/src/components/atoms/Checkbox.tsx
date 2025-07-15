@@ -19,18 +19,18 @@ export const Checkbox = ({
         <div className="flex items-center h-5">
           <input
             type="checkbox"
-            className={`h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 ${
-              error ? 'border-red-500' : ''
+            className={`h-4 w-4 rounded border-input-border text-primary focus:ring-focus-ring ${
+              error ? 'border-error' : ''
             }`}
             {...props}
           />
         </div>
-        <div className="ml-2 text-sm">
+        <div className="ml-2 text-sm text-text">
           {label}
         </div>
       </label>
       {error && (
-        <p className="mt-1 text-sm text-red-600">{error}</p>
+        <p className="mt-1 text-sm text-error">{error}</p>
       )}
     </div>
   );

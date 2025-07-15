@@ -120,34 +120,35 @@ export default function Dashboard() {
     <div>
       <div className="mb-4 sm:mb-8">
         <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4'>
-            <h1 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-lg sm:text-2xl font-bold text-heading">
             Добро пожаловать, {session?.user?.name || 'пользователь'}!
             </h1>
             {businessName && (
-                <div className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-3 sm:px-6 py-1 rounded-full text-sm sm:text-xl w-fit">
-                    💼 <span className="truncate">{businessName}</span>
+                <div className="bg-success/10 text-success border border-success/20 px-3 sm:px-6 py-1 rounded-full text-sm sm:text-base w-fit">
+                    � <span className="truncate font-medium">{businessName}</span>
                 </div>
             )}
         </div>
-        <p className="mt-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+        <p className="mt-1 text-xs sm:text-sm text-text-muted">
           Вот сводка вашей деятельности на сегодня
         </p>
       </div>
 
       {!isBusinessSetup ? (
-        <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg p-6">
+        <div className="bg-content-bg shadow-card overflow-hidden sm:rounded-lg p-6 border border-card-border">
           <div className="text-center">
             <div className="flex items-center justify-center gap-3 mb-4">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              <span className="text-3xl">💎</span>
+              <h2 className="text-xl font-semibold text-heading">
                 Настройте свой бизнес-профиль
               </h2>
             </div>
-            <p className="mb-6 text-gray-600 dark:text-gray-400">
+            <p className="mb-6 text-text-body">
               Для начала работы необходимо настроить профиль вашего бизнеса.
             </p>
             <Link
               href="/settings/business-profile"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md shadow-button text-primary-contrast bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary/50 transition-colors"
             >
               Настроить профиль
             </Link>
@@ -158,12 +159,12 @@ export default function Dashboard() {
           {/* Stats */}
           <div className="grid grid-cols-1 gap-3 sm:gap-5 sm:grid-cols-2 xl:grid-cols-4">
             {/* Today's Appointments */}
-            <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div className="bg-content-bg overflow-hidden shadow-card rounded-lg border border-card-border">
               <div className="p-4 sm:p-5">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-blue-500 rounded-md p-2 sm:p-3">
+                  <div className="flex-shrink-0 bg-primary rounded-md p-2 sm:p-3">
                     <svg
-                      className="h-4 w-4 sm:h-6 sm:w-6 text-white"
+                      className="h-4 w-4 sm:h-6 sm:w-6 text-primary-contrast"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -179,11 +180,11 @@ export default function Dashboard() {
                   </div>
                   <div className="ml-3 sm:ml-5 w-0 flex-1 min-w-0">
                     <dl>
-                      <dt className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                      <dt className="text-xs sm:text-sm font-medium text-text-muted truncate">
                         Записей сегодня
                       </dt>
                       <dd>
-                        <div className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
+                        <div className="text-base sm:text-lg font-bold text-heading">
                           {stats.appointmentsToday}
                         </div>
                       </dd>
@@ -191,11 +192,11 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 dark:bg-gray-700 px-4 sm:px-5 py-2 sm:py-3">
+              <div className="bg-card-muted px-4 sm:px-5 py-2 sm:py-3 border-t border-card-border">
                 <div className="text-xs sm:text-sm">
                   <Link
                     href="/dashboard/appointments"
-                    className="font-medium text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                    className="font-medium text-primary hover:text-primary-hover transition-colors"
                   >
                     Посмотреть все
                   </Link>
@@ -204,10 +205,10 @@ export default function Dashboard() {
             </div>
 
             {/* Weekly Appointments */}
-            <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div className="bg-content-bg overflow-hidden shadow-card rounded-lg border border-card-border">
               <div className="p-4 sm:p-5">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-green-500 rounded-md p-2 sm:p-3">
+                  <div className="flex-shrink-0 bg-success rounded-md p-2 sm:p-3">
                     <svg
                       className="h-4 w-4 sm:h-6 sm:w-6 text-white"
                       xmlns="http://www.w3.org/2000/svg"
@@ -225,11 +226,11 @@ export default function Dashboard() {
                   </div>
                   <div className="ml-3 sm:ml-5 w-0 flex-1 min-w-0">
                     <dl>
-                      <dt className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                      <dt className="text-xs sm:text-sm font-medium text-text-muted truncate">
                         Записей на неделю
                       </dt>
                       <dd>
-                        <div className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
+                        <div className="text-base sm:text-lg font-bold text-heading">
                           {stats.appointmentsWeek}
                         </div>
                       </dd>
@@ -237,11 +238,11 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 dark:bg-gray-700 px-4 sm:px-5 py-2 sm:py-3">
+              <div className="bg-card-muted px-4 sm:px-5 py-2 sm:py-3 border-t border-card-border">
                 <div className="text-xs sm:text-sm">
                   <Link
                     href="/dashboard/appointments"
-                    className="font-medium text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                    className="font-medium text-primary hover:text-primary-hover transition-colors"
                   >
                     Посмотреть все
                   </Link>
@@ -250,10 +251,10 @@ export default function Dashboard() {
             </div>
 
             {/* Total Clients */}
-            <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div className="bg-content-bg overflow-hidden shadow-card rounded-lg border border-card-border">
               <div className="p-4 sm:p-5">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-purple-500 rounded-md p-2 sm:p-3">
+                  <div className="flex-shrink-0 bg-secondary rounded-md p-2 sm:p-3">
                     <svg
                       className="h-4 w-4 sm:h-6 sm:w-6 text-white"
                       xmlns="http://www.w3.org/2000/svg"
@@ -271,11 +272,11 @@ export default function Dashboard() {
                   </div>
                   <div className="ml-3 sm:ml-5 w-0 flex-1 min-w-0">
                     <dl>
-                      <dt className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                      <dt className="text-xs sm:text-sm font-medium text-text-muted truncate">
                         Всего клиентов
                       </dt>
                       <dd>
-                        <div className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
+                        <div className="text-base sm:text-lg font-bold text-heading">
                           {stats.clientsTotal}
                         </div>
                       </dd>
@@ -283,11 +284,11 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 dark:bg-gray-700 px-4 sm:px-5 py-2 sm:py-3">
+              <div className="bg-card-muted px-4 sm:px-5 py-2 sm:py-3 border-t border-card-border">
                 <div className="text-xs sm:text-sm">
                   <Link
                     href="/dashboard/clients"
-                    className="font-medium text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                    className="font-medium text-primary hover:text-primary-hover transition-colors"
                   >
                     Посмотреть всех
                   </Link>
@@ -296,10 +297,10 @@ export default function Dashboard() {
             </div>
 
             {/* Revenue */}
-            <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div className="bg-content-bg overflow-hidden shadow-card rounded-lg border border-card-border">
               <div className="p-4 sm:p-5">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-yellow-500 rounded-md p-2 sm:p-3">
+                  <div className="flex-shrink-0 bg-warning rounded-md p-2 sm:p-3">
                     <svg
                       className="h-4 w-4 sm:h-6 sm:w-6 text-white"
                       xmlns="http://www.w3.org/2000/svg"
@@ -317,11 +318,11 @@ export default function Dashboard() {
                   </div>
                   <div className="ml-3 sm:ml-5 w-0 flex-1 min-w-0">
                     <dl>
-                      <dt className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                      <dt className="text-xs sm:text-sm font-medium text-text-muted truncate">
                         Доход за месяц
                       </dt>
                       <dd>
-                        <div className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
+                        <div className="text-base sm:text-lg font-bold text-heading">
                           {stats.revenue.toLocaleString()} ₸
                         </div>
                       </dd>
@@ -329,11 +330,11 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 dark:bg-gray-700 px-4 sm:px-5 py-2 sm:py-3">
+              <div className="bg-card-muted px-4 sm:px-5 py-2 sm:py-3 border-t border-card-border">
                 <div className="text-xs sm:text-sm">
                   <Link
                     href="/dashboard/payments"
-                    className="font-medium text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                    className="font-medium text-primary hover:text-primary-hover transition-colors"
                   >
                     Подробный отчет
                   </Link>
@@ -344,18 +345,18 @@ export default function Dashboard() {
 
           {/* Recent Appointments */}
           <div className="mt-6 sm:mt-8">
-            <h2 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-3 sm:mb-4">
+            <h2 className="text-base sm:text-lg font-medium text-heading mb-3 sm:mb-4">
               Ближайшие записи
             </h2>
-            <div className="bg-white dark:bg-gray-800 shadow overflow-hidden rounded-lg">
+            <div className="bg-content-bg shadow-card overflow-hidden rounded-lg border border-card-border">
               {recentAppointments.length === 0 ? (
                 <div className="text-center py-8 sm:py-12 px-4">
-                  <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">
+                  <p className="text-sm sm:text-base text-text-muted">
                     Нет запланированных записей на ближайшие дни
                   </p>
                 </div>
               ) : (
-                <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+                <ul className="divide-y divide-card-border">
                   {recentAppointments.map((appointment) => (
                     <li key={appointment._id}>
                       <div className="block hover:bg-gray-50 dark:hover:bg-gray-700">

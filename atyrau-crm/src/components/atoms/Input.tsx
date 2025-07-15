@@ -4,62 +4,64 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   helperText?: string;
   error?: boolean;
+  errorMessage?: string;
   fullWidth?: boolean;
   icon?: React.ReactNode;
-  variant?: 'outline' | 'filled';
+  variant?: 'default' | 'search';
 }
 
 export const Input = ({
   label,
   helperText,
   error = false,
+  errorMessage,
   fullWidth = false,
   icon,
-  variant = 'outline',
+  variant = 'default',
   className = '',
   ...props
 }: InputProps) => {
-  // Base classes
-  const baseClasses = 'block w-full rounded-md shadow-sm text-gray-900 placeholder-gray-400 sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
+  // Base classes using design system colors
+  const baseClasses = 'bg-input-bg text-input-text placeholder-input-placeholder rounded-md px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-focus-ring';
   
   // Variant classes
   const variantClasses = {
-    outline: 'border border-gray-300 focus:border-blue-500',
-    filled: 'bg-gray-100 border border-transparent focus:bg-white focus:border-blue-500',
+    default: 'border border-input-border focus:border-input-border-focus',
+    search: 'border border-input-border focus:border-input-border-focus pl-10',
   };
   
-  // Error classes
+  // Error classes using design system
   const errorClasses = error 
-    ? 'border-red-500 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500'
+    ? 'border-error focus:border-error focus:ring-error/30'
     : '';
   
   // Width classes
   const widthClasses = fullWidth ? 'w-full' : '';
   
   // Icon classes
-  const iconClasses = icon ? 'pl-10' : '';
+  const iconClasses = icon && variant !== 'search' ? 'pl-10' : '';
 
   return (
     <div className={`${fullWidth ? 'w-full' : ''} ${className}`}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-text mb-1">
           {label}
         </label>
       )}
       <div className="relative">
         {icon && (
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            {icon}
+            <div className="text-input-placeholder">{icon}</div>
           </div>
         )}
         <input
-          className={`${baseClasses} ${variantClasses[variant]} ${errorClasses} ${widthClasses} ${iconClasses} py-2 px-3`}
+          className={`${baseClasses} ${variantClasses[variant]} ${errorClasses} ${widthClasses} ${iconClasses}`}
           {...props}
         />
       </div>
-      {helperText && (
-        <p className={`mt-1 text-sm ${error ? 'text-red-600' : 'text-gray-500'}`}>
-          {helperText}
+      {(helperText || errorMessage) && (
+        <p className={`mt-1 text-sm ${error ? 'text-error' : 'text-text-secondary'}`}>
+          {error ? errorMessage : helperText}
         </p>
       )}
     </div>

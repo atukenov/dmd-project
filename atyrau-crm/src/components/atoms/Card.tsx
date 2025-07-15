@@ -8,6 +8,7 @@ interface CardProps {
   className?: string;
   bordered?: boolean;
   padding?: 'none' | 'small' | 'normal' | 'large';
+  hoverable?: boolean;
 }
 
 export const Card = ({
@@ -18,6 +19,7 @@ export const Card = ({
   className = '',
   bordered = true,
   padding = 'normal',
+  hoverable = false,
 }: CardProps) => {
   const paddingClasses = {
     none: 'p-0',
@@ -26,14 +28,17 @@ export const Card = ({
     large: 'p-6',
   };
   
-  const borderClasses = bordered ? 'border border-gray-200' : '';
+  // Using design system colors
+  const borderClasses = bordered ? 'border border-card-border' : '';
+  const hoverClasses = hoverable ? 'hover:shadow-lg transition-shadow duration-200 cursor-pointer' : '';
+  const baseClasses = 'bg-card-bg rounded-lg shadow-card';
 
   return (
-    <div className={`bg-white rounded-lg shadow-sm ${borderClasses} ${className}`}>
+    <div className={`${baseClasses} ${borderClasses} ${hoverClasses} ${className}`}>
       {(title || subtitle) && (
-        <div className="px-5 py-4 border-b border-gray-200">
-          {title && <h3 className="text-lg font-medium text-gray-900">{title}</h3>}
-          {subtitle && <p className="mt-1 text-sm text-gray-500">{subtitle}</p>}
+        <div className="px-5 py-4 border-b border-card-border">
+          {title && <h3 className="text-lg font-medium text-text">{title}</h3>}
+          {subtitle && <p className="mt-1 text-sm text-text-secondary">{subtitle}</p>}
         </div>
       )}
       
@@ -42,7 +47,7 @@ export const Card = ({
       </div>
       
       {footer && (
-        <div className="px-5 py-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">
+        <div className="px-5 py-4 bg-gray-50 border-t border-card-border rounded-b-lg">
           {footer}
         </div>
       )}

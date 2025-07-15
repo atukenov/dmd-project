@@ -1,26 +1,107 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* --background: #ffffff; */
+  /* --foreground: #171717; */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Primary Colors */
+  --color-primary: #1d7fbe;
+  --color-primary-hover: #21b6a8;
+  --color-accent: #21b6a8;
+  --color-diamond: #8b9dc3;
+  
+  /* Background Colors */
+  --color-app-bg: #f8fafc;
+  --color-nav-bg: #1e293b;
+  --color-sidebar-bg: #334155;
+  --color-content-bg: #ffffff;
+  --color-background: #f9fafb;
+  
+  /* Typography Colors */
+  --color-heading-primary: #0f172a;
+  --color-heading-secondary: #1e293b;
+  --color-heading-tertiary: #334155;
+  --color-heading-minor: #475569;
+  --color-text: #0f172a;
+  --color-text-body: #374151;
+  --color-text-secondary: #64748b;
+  --color-text-muted: #6b7280;
+  --color-text-light: #9ca3af;
+  
+  /* Table Colors */
+  --color-table-header-bg: #f1f5f9;
+  --color-table-header-text: #475569;
+  --color-table-row-even: #ffffff;
+  --color-table-row-odd: #f8fafc;
+  --color-table-row-hover: #e2e8f0;
+  --color-table-border: #e2e8f0;
+  --color-table-sort-active: #1d7fbe;
+  
+  /* Select & Dropdown Colors */
+  --color-select-bg: #ffffff;
+  --color-select-border: #d1d5db;
+  --color-select-border-focus: #1d7fbe;
+  --color-option-hover: #ebf4ff;
+  --color-option-selected: #dbeafe;
+  --color-option-text: #374151;
+  
+  /* Navigation Colors */
+  --color-sidebar-item: #94a3b8;
+  --color-sidebar-item-hover: #cbd5e1;
+  --color-sidebar-active: #21b6a8;
+  --color-sidebar-active-bg: rgba(33, 182, 168, 0.1);
+  --color-nav-link: #e2e8f0;
+  --color-nav-link-active: #ffffff;
+  --color-breadcrumb: #64748b;
+  --color-breadcrumb-active: #1d7fbe;
+  
+  /* Status Colors */
+  --color-success: #22c55e;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+  --color-white: #ffffff;
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Input colors */
+  --color-input-bg: #ffffff;
+  --color-input-border: #d1d5db;
+  --color-input-border-focus: #1d7fbe;
+  --color-input-text: #0f172a;
+  --color-input-placeholder: #9ca3af;
+
+  /* Card colors */
+  --color-card-bg: #ffffff;
+  --color-card-border: #e5e7eb;
+  --color-card-shadow: rgba(0, 0, 0, 0.1);
+
+  /* Modal colors */
+  --color-modal-overlay: rgba(0, 0, 0, 0.5);
+  --color-modal-bg: #ffffff;
+  --color-modal-border: #e5e7eb;
+
+  /* Border colors */
+  --color-border: #e5e7eb;
+  --color-border-strong: #d1d5db;
+
+  /* Interactive colors */
+  --color-hover-bg: #f3f4f6;
+  --color-disabled-text: #9ca3af;
+  --color-disabled-bg: #f3f4f6;
+  --color-focus-ring: rgba(29, 127, 190, 0.3);
+
+  /* Box shadows */
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-nav: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+
+  /* Fonts */
+  --font-sans: var(--font-inter), sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-app-bg);
+  color: var(--color-text-body);
+  font-family: var(--font-sans);
 }

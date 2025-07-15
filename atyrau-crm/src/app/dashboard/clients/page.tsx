@@ -2,6 +2,13 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { formatDate } from '@/lib/utils/date-utils';
+import { 
+  Button, 
+  SearchInput, 
+  Card, 
+  LoadingSpinner, 
+  Notification
+} from '@/components';
 
 interface Client {
   _id: string;
@@ -84,11 +91,6 @@ export default function ClientsPage() {
     fetchClients();
   }, [fetchClients]);
   
-  function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1); // Reset to first page on new search
-  }
-  
   function handleAddModalOpen() {
     setFormData({
       name: '',
@@ -145,91 +147,94 @@ export default function ClientsPage() {
   return (
     <div className="max-w-6xl mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Клиенты</h1>
-        <button
+        <h1 className="text-2xl font-bold text-text">Клиенты</h1>
+        <Button
           onClick={handleAddModalOpen}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded"
+          variant="primary"
         >
           Добавить клиента
-        </button>
+        </Button>
       </div>
       
       {/* Search Bar */}
       <div className="mb-6">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Поиск по имени, телефону или email..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-            className="w-full p-3 pl-10 border border-gray-300 rounded-md"
-          />
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-          </div>
-        </div>
+        <SearchInput
+          placeholder="Поиск по имени, телефону или email..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onSearch={(value) => {
+            setSearchQuery(value);
+            setCurrentPage(1);
+          }}
+          showClearButton={!!searchQuery}
+          onClear={() => {
+            setSearchQuery('');
+            setCurrentPage(1);
+          }}
+          fullWidth
+        />
       </div>
       
       {/* Clients List */}
       {isLoading ? (
-        <div className="flex justify-center p-8">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
+        <Card className="p-8">
+          <LoadingSpinner size="lg" />
+        </Card>
       ) : error ? (
-        <div className="text-red-500 p-4 text-center">
-          {error}
-        </div>
+        <Notification
+          type="error"
+          title="Ошибка загрузки"
+          message={error}
+        />
       ) : clients.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-8 text-center">
-          <p className="text-gray-500 mb-4">
+        <Card className="text-center p-8">
+          <p className="text-text-secondary mb-4">
             {searchQuery ? 'Нет клиентов, соответствующих вашему поиску.' : 'У вас еще нет клиентов.'}
           </p>
-          <button
+          <Button
             onClick={handleAddModalOpen}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded"
+            variant="primary"
           >
             Добавить первого клиента
-          </button>
-        </div>
+          </Button>
+        </Card>
       ) : (
         <>
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
+          <Card className="overflow-hidden" padding="none">
+            <table className="min-w-full divide-y divide-card-border">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Клиент
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Контакты
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Визиты
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Последний визит
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-card-bg divide-y divide-card-border">
                 {clients.map(client => (
                   <tr 
                     key={client._id} 
-                    className="hover:bg-gray-50 cursor-pointer"
+                    className="hover:bg-hover-bg cursor-pointer"
                     onClick={() => window.location.href = `/dashboard/clients/${client._id}`}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="font-medium text-gray-900">{client.name}</div>
-                      <div className="text-sm text-gray-500">
+                      <div className="font-medium text-text">{client.name}</div>
+                      <div className="text-sm text-text-secondary">
                         Клиент с {formatDate(new Date(client.createdAt))}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{client.phone}</div>
+                      <div className="text-sm text-text">{client.phone}</div>
                       {client.email && (
-                        <div className="text-sm text-gray-500">{client.email}</div>
+                        <div className="text-sm text-text-secondary">{client.email}</div>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -237,28 +242,28 @@ export default function ClientsPage() {
                         <span className="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">
                           {client.stats.appointmentCount} всего
                         </span>
-                        <span className="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">
+                        <span className="bg-success/10 text-success text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">
                           {client.stats.completedAppointments} завершено
                         </span>
-                        <span className="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                        <span className="bg-error/10 text-error text-xs font-semibold px-2.5 py-0.5 rounded">
                           {client.stats.cancelledAppointments + client.stats.noShowAppointments} отменено/неявка
                         </span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {client.stats.lastVisit ? (
-                        <div className="text-sm text-gray-900">
+                        <div className="text-sm text-text">
                           {formatDate(new Date(client.stats.lastVisit))}
                         </div>
                       ) : (
-                        <div className="text-sm text-gray-500">Нет визитов</div>
+                        <div className="text-sm text-text-secondary">Нет визитов</div>
                       )}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
+          </Card>
           
           {/* Pagination */}
           {totalPages > 1 && (
@@ -313,14 +318,24 @@ export default function ClientsPage() {
       {/* Add Client Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h2 className="text-xl font-bold mb-4">
-              Добавить нового клиента
-            </h2>
+          <Card className="max-w-md w-full mx-4" padding="large">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-text">
+                Добавить нового клиента
+              </h2>
+              <button
+                onClick={handleModalClose}
+                className="text-text-secondary hover:text-text"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="name" className="block text-sm font-medium text-text-secondary mb-1">
                   Имя *
                 </label>
                 <input
@@ -330,12 +345,12 @@ export default function ClientsPage() {
                   value={formData.name}
                   onChange={handleFormChange}
                   required
-                  className="w-full p-2 border border-gray-300 rounded-md"
+                  className="w-full px-3 py-2 border border-input-border rounded-md bg-input-bg text-text focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
                 />
               </div>
               
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="phone" className="block text-sm font-medium text-text-secondary mb-1">
                   Номер телефона *
                 </label>
                 <input
@@ -345,12 +360,12 @@ export default function ClientsPage() {
                   value={formData.phone}
                   onChange={handleFormChange}
                   required
-                  className="w-full p-2 border border-gray-300 rounded-md"
+                  className="w-full px-3 py-2 border border-input-border rounded-md bg-input-bg text-text focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
                 />
               </div>
               
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="email" className="block text-sm font-medium text-text-secondary mb-1">
                   Email
                 </label>
                 <input
@@ -359,12 +374,12 @@ export default function ClientsPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleFormChange}
-                  className="w-full p-2 border border-gray-300 rounded-md"
+                  className="w-full px-3 py-2 border border-input-border rounded-md bg-input-bg text-text focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
                 />
               </div>
               
               <div>
-                <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="notes" className="block text-sm font-medium text-text-secondary mb-1">
                   Заметки
                 </label>
                 <textarea
@@ -373,27 +388,27 @@ export default function ClientsPage() {
                   value={formData.notes}
                   onChange={handleFormChange}
                   rows={3}
-                  className="w-full p-2 border border-gray-300 rounded-md"
+                  className="w-full px-3 py-2 border border-input-border rounded-md bg-input-bg text-text focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent resize-none"
                 />
               </div>
               
-              <div className="flex justify-end space-x-2 pt-4">
-                <button
+              <div className="flex justify-end space-x-3 pt-4">
+                <Button
                   type="button"
+                  variant="secondary"
                   onClick={handleModalClose}
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded"
                 >
                   Отмена
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded"
+                  variant="primary"
                 >
                   Добавить
-                </button>
+                </Button>
               </div>
             </form>
-          </div>
+          </Card>
         </div>
       )}
     </div>

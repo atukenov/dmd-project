@@ -3,17 +3,8 @@
 import { useState } from 'react';
 import { useBusinessStore } from '@/store/businessStore';
 import { useServices } from '@/hooks/useServices';
-
-type Service = {
-  id: string;
-  name: string;
-  description: string;
-  duration: number;
-  price: number;
-  category: string;
-  image: string | null;
-  isActive: boolean;
-};
+import { Button, SearchInput } from '@/components';
+import { Service } from '@/types/models';
 
 type ServiceFormData = {
   id?: string;
@@ -176,14 +167,16 @@ export default function ServicesPage() {
       resetForm();
     } catch (error) {
       console.error('Error submitting service:', error);
-      setSubmitError(error instanceof Error ? error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" : 'An unexpected error occurred');
+      setSubmitError(error instanceof Error ? error.message : 'An unexpected error occurred');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   // Handle service deletion
-  const handleDeleteService = async (serviceId: string) => {
+  const handleDeleteService = async (serviceId: string | undefined) => {
+    if (!serviceId) return;
+    
     if (confirmDelete !== serviceId) {
       setConfirmDelete(serviceId);
       return;
@@ -206,7 +199,7 @@ export default function ServicesPage() {
       setConfirmDelete(null);
     } catch (error) {
       console.error('Error deleting service:', error);
-      alert(`Failed to delete service: ${error instanceof Error ? error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" : 'Unknown error'}`);
+      alert(`Failed to delete service: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -225,9 +218,9 @@ export default function ServicesPage() {
     <div className="max-w-6xl mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold dark:text-white">Управление услугами</h1>
-        <button
+        <Button
           onClick={handleAddService}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center"
+          variant="primary"
           disabled={!businessId}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 mr-2">
@@ -236,7 +229,7 @@ export default function ServicesPage() {
             <line x1="8" y1="12" x2="16" y2="12"></line>
           </svg>
           Добавить услугу
-        </button>
+        </Button>
       </div>
 
       {!businessId ? (
@@ -250,21 +243,14 @@ export default function ServicesPage() {
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Search */}
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-gray-400">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Поиск услуг..."
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
+              <SearchInput
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Поиск услуг..."
+                fullWidth
+                showClearButton
+                onClear={() => setSearchTerm('')}
+              />
 
               {/* Category Filter */}
               <div>
@@ -352,7 +338,7 @@ export default function ServicesPage() {
                   </thead>
                   <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {filteredServices.map((service) => (
-                      <tr key={service.id} className={!service.isActive ? 'bg-gray-50 dark:bg-gray-900' : ''}>
+                      <tr key={service.id || service.name} className={!service.isActive ? 'bg-gray-50 dark:bg-gray-900' : ''}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900 dark:text-white">{service.name}</div>
                           <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">{service.description}</div>
@@ -380,6 +366,7 @@ export default function ServicesPage() {
                             <button
                               onClick={() => handleEditService(service)}
                               className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200"
+                              disabled={!service.id}
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -391,6 +378,7 @@ export default function ServicesPage() {
                                 <button
                                   onClick={() => handleDeleteService(service.id)}
                                   className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"
+                                  disabled={!service.id}
                                 >
                                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
                                     <polyline points="20,6 9,17 4,12"></polyline>
@@ -410,6 +398,7 @@ export default function ServicesPage() {
                               <button
                                 onClick={() => handleDeleteService(service.id)}
                                 className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"
+                                disabled={!service.id}
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
                                   <polyline points="3,6 5,6 21,6"></polyline>
@@ -545,37 +534,22 @@ export default function ServicesPage() {
                 </label>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-4">
-                <button
+              <div className="flex justify-end space-x-3 pt-4">
+                <Button
                   type="button"
+                  variant="secondary"
                   onClick={() => setShowModal(false)}
-                  className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-medium py-2 px-4 rounded"
                 >
                   Отмена
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
+                  variant="primary"
                   disabled={isSubmitting}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded disabled:opacity-50"
+                  isLoading={isSubmitting}
                 >
-                  {isSubmitting ? (
-                    <span className="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 animate-spin mr-2">
-                        <line x1="12" y1="2" x2="12" y2="6"></line>
-                        <line x1="12" y1="18" x2="12" y2="22"></line>
-                        <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
-                        <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
-                        <line x1="2" y1="12" x2="6" y2="12"></line>
-                        <line x1="18" y1="12" x2="22" y2="12"></line>
-                        <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
-                        <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
-                      </svg>
-                      {isEditMode ? 'Обновление...' : 'Создание...'}
-                    </span>
-                  ) : (
-                    isEditMode ? 'Обновить' : 'Создать'
-                  )}
-                </button>
+                  {isEditMode ? 'Обновить' : 'Создать'}
+                </Button>
               </div>
             </form>
           </div>

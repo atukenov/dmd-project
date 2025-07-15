@@ -21,15 +21,15 @@ export const Button = ({
   disabled,
   ...props
 }: ButtonProps) => {
-  // Base classes
-  const baseClasses = 'inline-flex items-center justify-center font-medium transition-colors rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2';
+  // Base classes using design system
+  const baseClasses = 'inline-flex items-center justify-center font-medium transition-colors rounded-md focus:outline-none focus:ring-2';
   
-  // Variant classes
+  // Variant classes using design system colors
   const variantClasses = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
-    secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500',
-    outline: 'bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-blue-500',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
+    primary: 'bg-primary hover:bg-primary-hover text-white focus:ring-focus-ring',
+    secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-800 focus:ring-gray-500/30',
+    outline: 'bg-transparent border border-border hover:bg-hover-bg text-text focus:ring-focus-ring',
+    danger: 'bg-error hover:bg-red-600 text-white focus:ring-error/30',
   };
   
   // Size classes
@@ -43,14 +43,14 @@ export const Button = ({
   // Width classes
   const widthClasses = fullWidth ? 'w-full' : '';
   
-  // Disabled and loading classes
+  // Disabled and loading classes using design system
   const stateClasses = (disabled || isLoading) 
-    ? 'opacity-70 cursor-not-allowed' 
+    ? 'bg-disabled-bg text-disabled-text cursor-not-allowed opacity-70' 
     : 'cursor-pointer';
 
   return (
     <button
-      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${widthClasses} ${stateClasses} ${className}`}
+      className={`${baseClasses} ${!disabled && !isLoading ? variantClasses[variant] : ''} ${sizeClasses[size]} ${widthClasses} ${stateClasses} ${className}`}
       disabled={disabled || isLoading}
       {...props}
     >

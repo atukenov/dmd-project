@@ -125,17 +125,21 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-app-bg px-4 py-12">
       <Card className="w-full max-w-md">
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Регистрация</h1>
-          <p className="text-gray-600 dark:text-gray-300 mt-2">
+          <div className="mb-4">
+            <span className="text-4xl">💎</span>
+          </div>
+          <h1 className="text-2xl font-bold text-text">Атырау CRM</h1>
+          <h2 className="text-lg font-semibold text-text mt-2">Регистрация</h2>
+          <p className="text-text-muted mt-2">
             Создайте аккаунт для использования платформы
           </p>
         </div>
         
         {errors.general && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          <div className="mb-4 p-3 bg-error/10 border border-error/30 text-error rounded-md">
             {errors.general}
           </div>
         )}
@@ -204,7 +208,7 @@ export default function SignupPage() {
             label={
               <span>
                 Я согласен с{' '}
-                <Link href="/terms" className="text-blue-600 hover:text-blue-800 dark:text-blue-400">
+                <Link href="/terms" className="text-primary hover:text-primary-hover transition-colors">
                   условиями использования
                 </Link>
               </span>
@@ -223,9 +227,9 @@ export default function SignupPage() {
         </form>
         
         <div className="mt-6 text-center">
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="text-text-muted">
             Уже есть аккаунт?{' '}
-            <Link href="/auth/signin" className="text-blue-600 hover:text-blue-800 dark:text-blue-400">
+            <Link href="/auth/signin" className="text-primary hover:text-primary-hover transition-colors font-medium">
               Войти
             </Link>
           </p>
