@@ -254,7 +254,7 @@ export default function Dashboard() {
             <div className="bg-content-bg overflow-hidden shadow-card rounded-lg border border-card-border">
               <div className="p-4 sm:p-5">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-secondary rounded-md p-2 sm:p-3">
+                  <div className="flex-shrink-0 bg-accent rounded-md p-2 sm:p-3">
                     <svg
                       className="h-4 w-4 sm:h-6 sm:w-6 text-white"
                       xmlns="http://www.w3.org/2000/svg"
