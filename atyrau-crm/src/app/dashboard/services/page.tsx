@@ -322,7 +322,7 @@ export default function ServicesPage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-table-border">
+                <table className="min-w-full divide-y divide-card-border">
                   <thead className="bg-table-header-bg">
                     <tr>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-table-header-text uppercase tracking-wider">
@@ -331,41 +331,41 @@ export default function ServicesPage() {
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-table-header-text uppercase tracking-wider">
                         Категория
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-table-header-text uppercase tracking-wider">
                         Длительность
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-table-header-text uppercase tracking-wider">
                         Цена
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-table-header-text uppercase tracking-wider">
                         Статус
                       </th>
-                      <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-table-header-text uppercase tracking-wider">
                         Действия
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="bg-card-bg divide-y divide-card-border">
                     {filteredServices.map((service) => (
-                      <tr key={service.id || service.name} className={!service.isActive ? 'bg-gray-50 dark:bg-gray-900' : ''}>
+                      <tr key={service.id || service.name} className={`hover:bg-table-row-hover cursor-pointer transition-colors ${!service.isActive ? 'opacity-75' : ''}`}>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">{service.name}</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">{service.description}</div>
+                          <div className="font-medium text-text">{service.name}</div>
+                          <div className="text-sm text-text-muted truncate max-w-xs">{service.description}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-500 dark:text-gray-400">{getCategoryName(service.category)}</div>
+                          <div className="text-sm text-text">{getCategoryName(service.category)}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-500 dark:text-gray-400">{service.duration} мин</div>
+                          <div className="text-sm text-text">{service.duration} мин</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-500 dark:text-gray-400">{service.price} ₸</div>
+                          <div className="text-sm font-medium text-text">{service.price} ₸</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                             service.isActive 
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                              : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                              ? 'bg-success/10 text-success' 
+                              : 'bg-card-muted text-text-muted'
                           }`}>
                             {service.isActive ? 'Активна' : 'Неактивна'}
                           </span>
@@ -373,9 +373,13 @@ export default function ServicesPage() {
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex justify-end space-x-2">
                             <button
-                              onClick={() => handleEditService(service)}
-                              className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditService(service);
+                              }}
+                              className="text-primary hover:text-primary-hover transition-colors"
                               disabled={!service.id}
+                              title="Редактировать"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -385,17 +389,25 @@ export default function ServicesPage() {
                             {confirmDelete === service.id ? (
                               <div className="flex space-x-1">
                                 <button
-                                  onClick={() => handleDeleteService(service.id)}
-                                  className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteService(service.id);
+                                  }}
+                                  className="text-success hover:text-success/80 transition-colors"
                                   disabled={!service.id}
+                                  title="Подтвердить удаление"
                                 >
                                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
                                     <polyline points="20,6 9,17 4,12"></polyline>
                                   </svg>
                                 </button>
                                 <button
-                                  onClick={handleCancelDelete}
-                                  className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleCancelDelete();
+                                  }}
+                                  className="text-text-muted hover:text-text transition-colors"
+                                  title="Отменить"
                                 >
                                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
                                     <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -405,9 +417,13 @@ export default function ServicesPage() {
                               </div>
                             ) : (
                               <button
-                                onClick={() => handleDeleteService(service.id)}
-                                className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteService(service.id);
+                                }}
+                                className="text-error hover:text-error/80 transition-colors"
                                 disabled={!service.id}
+                                title="Удалить"
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
                                   <polyline points="3,6 5,6 21,6"></polyline>
@@ -430,22 +446,32 @@ export default function ServicesPage() {
 
       {/* Create/Edit Service Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4 dark:text-white">
-              {isEditMode ? 'Редактировать услугу' : 'Добавить новую услугу'}
-            </h2>
+        <div className="fixed inset-0 bg-modal-overlay flex items-center justify-center z-50">
+          <div className="bg-modal-bg border border-modal-border rounded-lg max-w-lg w-full mx-4 p-6 max-h-[90vh] overflow-y-auto shadow-modal">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-text">
+                {isEditMode ? 'Редактировать услугу' : 'Добавить новую услугу'}
+              </h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-text-muted hover:text-text transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               {submitError && (
-                <div className="bg-red-50 dark:bg-red-900 border-l-4 border-red-500 text-red-700 dark:text-red-200 p-4">
+                <div className="bg-error/10 border-l-4 border-error text-error p-4 rounded-r-md">
                   <p>{submitError}</p>
                 </div>
               )}
 
               {/* Service Name */}
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label htmlFor="name" className="block text-sm font-medium text-text-secondary mb-1">
                   Название услуги *
                 </label>
                 <input
@@ -455,13 +481,13 @@ export default function ServicesPage() {
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="w-full px-3 py-2 border border-input-border rounded-md bg-input-bg text-text focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
                 />
               </div>
 
               {/* Description */}
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label htmlFor="description" className="block text-sm font-medium text-text-secondary mb-1">
                   Описание
                 </label>
                 <textarea
@@ -470,13 +496,13 @@ export default function ServicesPage() {
                   value={formData.description}
                   onChange={handleInputChange}
                   rows={3}
-                  className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="w-full px-3 py-2 border border-input-border rounded-md bg-input-bg text-text focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors resize-none"
                 />
               </div>
 
               {/* Category */}
               <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label htmlFor="category" className="block text-sm font-medium text-text-secondary mb-1">
                   Категория
                 </label>
                 <select
@@ -484,7 +510,7 @@ export default function ServicesPage() {
                   name="category"
                   value={formData.category}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="w-full px-3 py-2 border border-input-border rounded-md bg-input-bg text-text focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
                 >
                   {categories.map(category => (
                     <option key={category.id} value={category.id}>{category.name}</option>
@@ -495,7 +521,7 @@ export default function ServicesPage() {
               {/* Duration and Price */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="duration" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="duration" className="block text-sm font-medium text-text-secondary mb-1">
                     Длительность (мин) *
                   </label>
                   <input
@@ -507,11 +533,11 @@ export default function ServicesPage() {
                     min="5"
                     step="5"
                     required
-                    className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                    className="w-full px-3 py-2 border border-input-border rounded-md bg-input-bg text-text focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
                   />
                 </div>
                 <div>
-                  <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="price" className="block text-sm font-medium text-text-secondary mb-1">
                     Цена (₸) *
                   </label>
                   <input
@@ -523,7 +549,7 @@ export default function ServicesPage() {
                     min="0"
                     step="50"
                     required
-                    className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                    className="w-full px-3 py-2 border border-input-border rounded-md bg-input-bg text-text focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
                   />
                 </div>
               </div>
@@ -536,9 +562,9 @@ export default function ServicesPage() {
                   name="isActive"
                   checked={formData.isActive}
                   onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-primary focus:ring-primary/20 border-input-border rounded"
                 />
-                <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900 dark:text-white">
+                <label htmlFor="isActive" className="ml-2 block text-sm text-text">
                   Услуга активна
                 </label>
               </div>

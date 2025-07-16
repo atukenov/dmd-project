@@ -118,38 +118,38 @@ export function Calendar({
     const isCurrentMonth = date.getMonth() === viewDate.month;
     const highlightType = getHighlightType(date);
     
-    let classes = 'flex items-center justify-center w-10 h-10 rounded-full';
+    let classes = 'flex items-center justify-center w-10 h-10 rounded-full text-sm font-medium transition-colors';
     
     // Base styles based on month and disabled state
     if (!isCurrentMonth) {
-      classes += ' text-gray-400 dark:text-gray-600';
+      classes += ' text-text-light';
     } else if (isDisabled) {
-      classes += ' text-gray-400 dark:text-gray-600 cursor-not-allowed';
+      classes += ' text-disabled-text cursor-not-allowed';
     } else {
-      classes += ' hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer';
+      classes += ' hover:bg-table-row-hover cursor-pointer text-text';
     }
     
     // Today indicator
     if (isToday(date)) {
-      classes += ' border border-blue-500 dark:border-blue-400';
+      classes += ' border-2 border-primary';
     }
     
     // Selected state
     if (isSelected) {
-      classes += ' bg-blue-500 dark:bg-blue-600 text-white hover:bg-blue-600 dark:hover:bg-blue-500';
+      classes += ' bg-primary text-white hover:bg-primary-hover';
     }
     
     // Highlight states
     if (highlightType && !isDisabled && !isSelected) {
       switch (highlightType) {
         case 'busy':
-          classes += ' bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200';
+          classes += ' bg-error/10 text-error border border-error/20';
           break;
         case 'available':
-          classes += ' bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200';
+          classes += ' bg-success/10 text-success border border-success/20';
           break;
         case 'custom':
-          classes += ' bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200';
+          classes += ' bg-warning/10 text-warning border border-warning/20';
           break;
       }
     }
@@ -158,18 +158,18 @@ export function Calendar({
   };
   
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow p-4 ${className}`}>
+    <div className={`bg-content-bg border border-card-border rounded-lg shadow-card p-6 ${className}`}>
       {/* Calendar header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-xl font-semibold text-heading-secondary">
             {monthNames[viewDate.month]} {viewDate.year}
           </h2>
         </div>
-        <div className="flex space-x-1">
+        <div className="flex items-center space-x-2">
           <button
             onClick={goToPreviousMonth}
-            className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="p-2 rounded-lg text-text-muted hover:text-text hover:bg-hover-bg transition-colors"
             aria-label="Previous month"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -178,13 +178,13 @@ export function Calendar({
           </button>
           <button
             onClick={goToToday}
-            className="p-2 text-sm rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="px-3 py-2 text-sm font-medium rounded-lg text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-colors"
           >
             Сегодня
           </button>
           <button
             onClick={goToNextMonth}
-            className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="p-2 rounded-lg text-text-muted hover:text-text hover:bg-hover-bg transition-colors"
             aria-label="Next month"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -195,9 +195,9 @@ export function Calendar({
       </div>
       
       {/* Weekday headers */}
-      <div className="grid grid-cols-7 gap-1 mb-2">
+      <div className="grid grid-cols-7 gap-1 mb-4">
         {weekDays.map((day, index) => (
-          <div key={index} className="text-center text-sm font-medium text-gray-500 dark:text-gray-400">
+          <div key={index} className="text-center text-sm font-semibold text-table-header-text py-2">
             {day}
           </div>
         ))}
@@ -220,10 +220,13 @@ export function Calendar({
       
       {/* Selected date display */}
       {selectedDate && (
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Выбрано: <span className="font-medium text-gray-900 dark:text-white">{formatDate(selectedDate)}</span>
-          </p>
+        <div className="mt-6 pt-4 border-t border-card-border">
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 bg-primary rounded-full"></div>
+            <p className="text-sm text-text-muted">
+              Выбрано: <span className="font-semibold text-text">{formatDate(selectedDate)}</span>
+            </p>
+          </div>
         </div>
       )}
     </div>
