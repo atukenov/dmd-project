@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
-import { ThemeToggle } from '@/components/atoms/ThemeToggle';
+import ThemeToggle from '@/components/ThemeToggle';
 
 // Navigation items
 const navItems = [
