@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap");
 @import "tailwindcss";
 
 :root {
@@ -7,14 +8,14 @@
   --color-primary-contrast: #ffffff;
   --color-accent: #21b6a8;
   --color-diamond: #8b9dc3;
-  
+
   /* Background Colors */
   --color-app-bg: #f8fafc;
   --color-nav-bg: #1e293b;
   --color-sidebar-bg: #334155;
   --color-content-bg: #ffffff;
   --color-background: #f9fafb;
-  
+
   /* Typography Colors */
   --color-heading: #0f172a;
   --color-heading-primary: #0f172a;
@@ -26,7 +27,7 @@
   --color-text-secondary: #64748b;
   --color-text-muted: #6b7280;
   --color-text-light: #9ca3af;
-  
+
   /* Table Colors */
   --color-table-header-bg: #f1f5f9;
   --color-table-header-text: #475569;
@@ -35,7 +36,7 @@
   --color-table-row-hover: #e2e8f0;
   --color-table-border: #e2e8f0;
   --color-table-sort-active: #1d7fbe;
-  
+
   /* Select & Dropdown Colors */
   --color-select-bg: #ffffff;
   --color-select-border: #d1d5db;
@@ -43,7 +44,7 @@
   --color-option-hover: #ebf4ff;
   --color-option-selected: #dbeafe;
   --color-option-text: #374151;
-  
+
   /* Navigation Colors */
   --color-sidebar-item: #94a3b8;
   --color-sidebar-item-hover: #cbd5e1;
@@ -53,7 +54,7 @@
   --color-nav-link-active: #ffffff;
   --color-breadcrumb: #64748b;
   --color-breadcrumb-active: #1d7fbe;
-  
+
   /* Status Colors */
   --color-success: #22c55e;
   --color-error: #ef4444;
@@ -96,7 +97,8 @@
 
   /* Box shadows */
   --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
   --shadow-nav: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   --shadow-step: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
   --shadow-button: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -110,14 +112,14 @@
   --color-primary-contrast: #ffffff;
   --color-accent: #21b6a8;
   --color-diamond: #8b9dc3;
-  
+
   /* Background Colors */
   --color-app-bg: #0f172a;
   --color-nav-bg: #020617;
   --color-sidebar-bg: #1e293b;
   --color-content-bg: #1e293b;
   --color-background: #0f172a;
-  
+
   /* Typography Colors */
   --color-heading: #f1f5f9;
   --color-heading-primary: #f1f5f9;
@@ -129,7 +131,7 @@
   --color-text-secondary: #cbd5e1;
   --color-text-muted: #94a3b8;
   --color-text-light: #64748b;
-  
+
   /* Table Colors */
   --color-table-header-bg: #334155;
   --color-table-header-text: #e2e8f0;
@@ -138,7 +140,7 @@
   --color-table-row-hover: #475569;
   --color-table-border: #475569;
   --color-table-sort-active: #3b82f6;
-  
+
   /* Select & Dropdown Colors */
   --color-select-bg: #334155;
   --color-select-border: #475569;
@@ -146,7 +148,7 @@
   --color-option-hover: #475569;
   --color-option-selected: #1e40af;
   --color-option-text: #e2e8f0;
-  
+
   /* Navigation Colors */
   --color-sidebar-item: #64748b;
   --color-sidebar-item-hover: #94a3b8;
@@ -156,7 +158,7 @@
   --color-nav-link-active: #ffffff;
   --color-breadcrumb: #94a3b8;
   --color-breadcrumb-active: #3b82f6;
-  
+
   /* Status Colors (keep same for consistency) */
   --color-success: #22c55e;
   --color-error: #ef4444;
@@ -199,7 +201,8 @@
 
   /* Box shadows */
   --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-  --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+  --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.4),
+    0 10px 10px -5px rgba(0, 0, 0, 0.2);
   --shadow-nav: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
   --shadow-step: 0 2px 4px 0 rgba(0, 0, 0, 0.3);
   --shadow-button: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
@@ -207,21 +210,21 @@
 
 @theme inline {
   /* Tailwind CSS Variables for Light and Dark Themes */
-  
+
   /* Primary */
   --color-primary: var(--color-primary);
   --color-primary-hover: var(--color-primary-hover);
   --color-primary-contrast: var(--color-primary-contrast);
   --color-accent: var(--color-accent);
   --color-diamond: var(--color-diamond);
-  
+
   /* Backgrounds */
   --color-app-bg: var(--color-app-bg);
   --color-nav-bg: var(--color-nav-bg);
   --color-sidebar-bg: var(--color-sidebar-bg);
   --color-content-bg: var(--color-content-bg);
   --color-background: var(--color-background);
-  
+
   /* Typography */
   --color-heading: var(--color-heading);
   --color-heading-primary: var(--color-heading-primary);
@@ -233,7 +236,7 @@
   --color-text-secondary: var(--color-text-secondary);
   --color-text-muted: var(--color-text-muted);
   --color-text-light: var(--color-text-light);
-  
+
   /* Tables */
   --color-table-header-bg: var(--color-table-header-bg);
   --color-table-header-text: var(--color-table-header-text);
@@ -242,7 +245,7 @@
   --color-table-row-hover: var(--color-table-row-hover);
   --color-table-border: var(--color-table-border);
   --color-table-sort-active: var(--color-table-sort-active);
-  
+
   /* Select & Dropdown */
   --color-select-bg: var(--color-select-bg);
   --color-select-border: var(--color-select-border);
@@ -250,7 +253,7 @@
   --color-option-hover: var(--color-option-hover);
   --color-option-selected: var(--color-option-selected);
   --color-option-text: var(--color-option-text);
-  
+
   /* Navigation */
   --color-sidebar-item: var(--color-sidebar-item);
   --color-sidebar-item-hover: var(--color-sidebar-item-hover);
@@ -260,7 +263,7 @@
   --color-nav-link-active: var(--color-nav-link-active);
   --color-breadcrumb: var(--color-breadcrumb);
   --color-breadcrumb-active: var(--color-breadcrumb-active);
-  
+
   /* Status */
   --color-success: var(--color-success);
   --color-error: var(--color-error);
@@ -310,12 +313,13 @@
 
   /* Fonts */
   --font-sans: var(--font-inter), sans-serif;
+  --font-title: "Archivo Black", sans-serif;
 }
 
 body {
   background: var(--color-app-bg);
   color: var(--color-text-body);
-  font-family: var(--font-sans);
+  font-family: var(--font-title);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 

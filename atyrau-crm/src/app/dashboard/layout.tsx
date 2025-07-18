@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useSession } from 'next-auth/react';
-import { redirect } from 'next/navigation';
-import { useEffect } from 'react';
-import { Navigation } from '@/components/organisms/Navigation';
+import { Navigation } from "@/components/organisms/Navigation";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
+import { useEffect } from "react";
 
 export default function DashboardLayout({
   children,
@@ -14,16 +14,16 @@ export default function DashboardLayout({
 
   // Check authentication and role
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      redirect('/auth/signin');
+    if (status === "unauthenticated") {
+      redirect("/auth/signin");
     }
 
-    if (status === 'authenticated' && session?.user?.role === 'client') {
-      redirect('/profile');
+    if (status === "authenticated" && session?.user?.role === "client") {
+      redirect("/profile");
     }
   }, [session, status]);
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="flex items-center justify-center min-h-screen bg-app-bg">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
@@ -39,10 +39,11 @@ export default function DashboardLayout({
       {/* Main content */}
       <div className="md:pl-64">
         <main className="pt-16 md:pt-0 pb-16 md:pb-0">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6">{children}</div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6">
+            {children}
+          </div>
         </main>
       </div>
     </div>
   );
 }
-
