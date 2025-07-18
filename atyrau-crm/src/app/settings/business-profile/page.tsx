@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useBusinessStore } from '@/store/businessStore';
+import { useNotificationTemplates } from '@/components/providers/NotificationProvider';
 import { Button } from '../../../components/atoms/Button';
 import { Card } from '../../../components/atoms/Card';
 import { Input } from '../../../components/atoms/Input';
@@ -25,6 +26,7 @@ type Step = 'info' | 'address' | 'services' | 'hours' | 'photos' | 'confirmation
 export default function BusinessProfileSetup() {
   const router = useRouter();
   const { businessId, setBusinessId, setBusinessName, setIsBusinessSetup } = useBusinessStore();
+  const notify = useNotificationTemplates();
   const [currentStep, setCurrentStep] = useState<Step>('info');
   const [loading, setLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
@@ -202,11 +204,18 @@ export default function BusinessProfileSetup() {
         setIsBusinessSetup(true);
       }
 
+      // Show success notification
+      notify.businessProfileSaved();
+
       // Redirect to dashboard after successful creation/update
       router.push('/dashboard');
       
     } catch (err) {
-      setError(err instanceof Error ? err.message : `Failed to ${businessId ? 'update' : 'create'} business profile`);
+      const errorMessage = err instanceof Error ? err.message : `Failed to ${businessId ? 'update' : 'create'} business profile`;
+      setError(errorMessage);
+      
+      // Show error notification
+      notify.businessProfileError();
     } finally {
       setLoading(false);
     }
