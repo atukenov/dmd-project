@@ -1,55 +1,77 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { Card } from '@/components/atoms/Card';
+import { Button } from '@/components/atoms/Button';
+import PaymentForm from '@/components/molecules/PaymentForm';
+import PaymentHistory from '@/components/molecules/PaymentHistory';
 
 export default function PaymentsPage() {
-  const [isLoading, setIsLoading] = useState(true);
-  
-  useEffect(() => {
-    // Simulate loading
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+
+  const handlePaymentCreated = () => {
+    setShowPaymentForm(false);
+    // The PaymentHistory component will automatically refresh
+  };
 
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-8">
-      <div className="sm:flex sm:items-center">
+      {/* Page Header */}
+      <div className="sm:flex sm:items-center sm:justify-between mb-8">
         <div className="sm:flex-auto">
           <h1 className="text-2xl font-semibold text-heading">Платежи</h1>
           <p className="mt-2 text-sm text-text-muted">
             Управляйте и отслеживайте все платежные транзакции вашего бизнеса.
           </p>
         </div>
-      </div>
-      
-      {isLoading ? (
-        <div className="mt-6 flex justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <div className="mt-4 sm:mt-0">
+          <Button
+            onClick={() => setShowPaymentForm(true)}
+            className="bg-primary hover:bg-primary-dark"
+          >
+            Создать платеж
+          </Button>
         </div>
-      ) : (
-        <div className="mt-8 flex flex-col">
-          <div className="bg-content-bg shadow-card overflow-hidden sm:rounded-lg p-6 border border-card-border">
-            <div className="border border-card-border rounded-md p-6 bg-card-muted">
-              <div className="text-center">
-                <span className="text-4xl mb-4 block">💎</span>
-                <h3 className="text-lg font-medium text-heading mb-2">
-                  Система платежей в разработке
-                </h3>
-                <p className="text-text-body mb-4">
-                  Функция платежей скоро появится в нашем следующем обновлении.
-                </p>
-                <p className="text-text-muted">
-                  Этот раздел позволит отслеживать платежи Kaspi QR, просматривать историю платежей и обрабатывать возвраты.
-                </p>
-              </div>
-            </div>
+      </div>
+
+      {/* Payment Stats - Placeholder for now */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <Card className="p-6 bg-content-bg border border-card-border">
+          <div className="text-sm font-medium text-text-muted">Общий доход</div>
+          <div className="text-2xl font-bold text-heading">₸0.00</div>
+          <div className="text-xs text-text-muted mt-1">В этом месяце</div>
+        </Card>
+        <Card className="p-6 bg-content-bg border border-card-border">
+          <div className="text-sm font-medium text-text-muted">В ожидании</div>
+          <div className="text-2xl font-bold text-warning">₸0.00</div>
+          <div className="text-xs text-text-muted mt-1">Ожидают оплаты</div>
+        </Card>
+        <Card className="p-6 bg-content-bg border border-card-border">
+          <div className="text-sm font-medium text-text-muted">Завершено</div>
+          <div className="text-2xl font-bold text-success">₸0.00</div>
+          <div className="text-xs text-text-muted mt-1">В этом месяце</div>
+        </Card>
+        <Card className="p-6 bg-content-bg border border-card-border">
+          <div className="text-sm font-medium text-text-muted">Всего платежей</div>
+          <div className="text-2xl font-bold text-heading">0</div>
+          <div className="text-xs text-text-muted mt-1">За все время</div>
+        </Card>
+      </div>
+
+      {/* Payment Form Modal */}
+      {showPaymentForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="max-w-md w-full">
+            <PaymentForm
+              onPaymentCreated={handlePaymentCreated}
+              onCancel={() => setShowPaymentForm(false)}
+            />
           </div>
         </div>
       )}
+
+      {/* Payment History */}
+      <PaymentHistory showActions={true} />
     </div>
   );
 }
-
