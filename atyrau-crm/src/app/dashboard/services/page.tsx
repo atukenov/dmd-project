@@ -5,6 +5,7 @@ import { useBusinessStore } from '@/store/businessStore';
 import { useServices } from '@/hooks/useServices';
 import { Button, SearchInput } from '@/components';
 import { Service } from '@/types/models';
+import { useNotifications } from '@/components/providers/NotificationProvider';
 
 type ServiceFormData = {
   id?: string;
@@ -31,6 +32,7 @@ const categories = [
 export default function ServicesPage() {
   const { businessId } = useBusinessStore();
   const { services, loading, error, refetch } = useServices();
+  const { success, error: showError, warning } = useNotifications();
   
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
@@ -102,8 +104,18 @@ export default function ServicesPage() {
   };
 
   // Open modal for creating a new service
+  // Handle adding a new service
   const handleAddService = () => {
+    if (!businessId) {
+      warning(
+        'Бизнес не выбран',
+        'Пожалуйста, выберите или создайте бизнес в настройках перед добавлением услуг'
+      );
+      return;
+    }
+    
     resetForm();
+    setIsEditMode(false);
     setShowModal(true);
   };
 
@@ -143,6 +155,12 @@ export default function ServicesPage() {
           const errorData = await response.json();
           throw new Error(errorData.message || 'Failed to update service');
         }
+
+        // Show success notification for update
+        success(
+          'Услуга обновлена!',
+          `Услуга "${formData.name}" успешно обновлена`
+        );
       } else {
         // Create new service
         const response = await fetch(`/api/business/${businessId}/services`, {
@@ -157,17 +175,30 @@ export default function ServicesPage() {
           const errorData = await response.json();
           throw new Error(errorData.message || 'Failed to create service');
         }
+
+        // Show success notification for create
+        success(
+          'Услуга создана!',
+          `Услуга "${formData.name}" успешно добавлена в систему`
+        );
       }
 
       // Refresh services list
       await refetch();
       
       // Close modal and reset form
-      setShowModal(false);
-      resetForm();
+      handleCloseModal();
     } catch (error) {
       console.error('Error submitting service:', error);
-      setSubmitError(error instanceof Error ? error.message : 'An unexpected error occurred');
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      
+      // Show error notification
+      showError(
+        isEditMode ? 'Ошибка при обновлении услуги' : 'Ошибка при создании услуги',
+        errorMessage
+      );
+      
+      setSubmitError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -179,8 +210,17 @@ export default function ServicesPage() {
     
     if (confirmDelete !== serviceId) {
       setConfirmDelete(serviceId);
+      // Show warning notification about confirmation needed
+      warning(
+        'Подтвердите удаление',
+        'Нажмите кнопку удаления еще раз для подтверждения'
+      );
       return;
     }
+
+    // Find the service name for the notification
+    const serviceToDelete = services.find(s => s.id === serviceId);
+    const serviceName = serviceToDelete?.name || 'Услуга';
 
     try {
       const response = await fetch(`/api/business/${businessId}/services/${serviceId}`, {
@@ -192,6 +232,12 @@ export default function ServicesPage() {
         throw new Error(errorData.message || 'Failed to delete service');
       }
 
+      // Show success notification
+      success(
+        'Услуга удалена!',
+        `Услуга "${serviceName}" успешно удалена`
+      );
+
       // Refresh services list
       await refetch();
       
@@ -199,13 +245,26 @@ export default function ServicesPage() {
       setConfirmDelete(null);
     } catch (error) {
       console.error('Error deleting service:', error);
-      alert(`Failed to delete service: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      
+      // Show error notification
+      showError(
+        'Ошибка при удалении услуги',
+        error instanceof Error ? error.message : 'Произошла неизвестная ошибка'
+      );
     }
   };
 
   // Cancel delete confirmation
   const handleCancelDelete = () => {
     setConfirmDelete(null);
+  };
+
+  // Handle modal close
+  const handleCloseModal = () => {
+    setShowModal(false);
+    resetForm();
+    setIsEditMode(false);
+    setSubmitError(null);
   };
 
   // Get category display name
@@ -453,7 +512,7 @@ export default function ServicesPage() {
                 {isEditMode ? 'Редактировать услугу' : 'Добавить новую услугу'}
               </h2>
               <button
-                onClick={() => setShowModal(false)}
+                onClick={handleCloseModal}
                 className="text-text-muted hover:text-text transition-colors"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -573,7 +632,7 @@ export default function ServicesPage() {
                 <Button
                   type="button"
                   variant="secondary"
-                  onClick={() => setShowModal(false)}
+                  onClick={handleCloseModal}
                 >
                   Отмена
                 </Button>

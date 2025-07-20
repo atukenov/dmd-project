@@ -9,6 +9,7 @@ import {
   LoadingSpinner, 
   Notification
 } from '@/components';
+import { useNotifications } from '@/components/providers/NotificationProvider';
 
 interface Client {
   _id: string;
@@ -31,6 +32,7 @@ export default function ClientsPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -41,6 +43,8 @@ export default function ClientsPage() {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [totalClients, setTotalClients] = useState<number>(0);
   const pageSize = 20;
+  
+  const { success, error: showError } = useNotifications();
   
   // Fetch clients
   const fetchClients = useCallback(async () => {
@@ -115,6 +119,7 @@ export default function ClientsPage() {
   
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setIsSubmitting(true);
     
     try {
       const response = await fetch('/api/clients/create', {
@@ -125,17 +130,31 @@ export default function ClientsPage() {
         body: JSON.stringify(formData)
       });
       
+      const responseData = await response.json();
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create client');
+        throw new Error(responseData.message || 'Failed to create client');
       }
+      
+      // Show success notification
+      success(
+        'Клиент добавлен!',
+        `Клиент "${formData.name}" успешно добавлен в систему`
+      );
       
       // Refresh clients list
       await fetchClients();
       handleModalClose();
     } catch (error) {
       console.error('Error creating client:', error);
-      alert(error instanceof Error ? error instanceof Error ? error instanceof Error ? error.message : "Unknown error" : "Unknown error" : 'An error occurred');
+      
+      // Show error notification
+      showError(
+        'Ошибка при добавлении клиента',
+        error instanceof Error ? error.message : 'Произошла неизвестная ошибка'
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   }
   
@@ -397,14 +416,16 @@ export default function ClientsPage() {
                   type="button"
                   variant="secondary"
                   onClick={handleModalClose}
+                  disabled={isSubmitting}
                 >
                   Отмена
                 </Button>
                 <Button
                   type="submit"
                   variant="primary"
+                  disabled={isSubmitting}
                 >
-                  Добавить
+                  {isSubmitting ? 'Добавление...' : 'Добавить'}
                 </Button>
               </div>
             </form>
