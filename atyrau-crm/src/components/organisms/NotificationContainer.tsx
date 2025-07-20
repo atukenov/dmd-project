@@ -20,7 +20,7 @@ export default function NotificationContainer() {
   // Use portal to render notifications outside the component tree
   return createPortal(
     <div
-      className="fixed top-4 right-4 z-50 flex flex-col space-y-3 pointer-events-none"
+      className="fixed top-4 right-4 z-50 max-w-2xl min-w-[350px] flex flex-col space-y-3 pointer-events-none"
       style={{ maxHeight: 'calc(100vh - 2rem)' }}
     >
       {notifications.slice(0, 5).map((notification) => (

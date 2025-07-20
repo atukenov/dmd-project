@@ -129,7 +129,7 @@ export default function NotificationManagement() {
                       })}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-text-muted">
-                      {notification.duration 
+                      {notification.duration !== undefined
                         ? notification.duration === 0 
                           ? 'Постоянное' 
                           : `${notification.duration / 1000}с`

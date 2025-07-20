@@ -62,22 +62,22 @@ export default function NotificationToast({ notification, onDismiss }: Notificat
   const getColorClasses = () => {
     switch (notification.type) {
       case 'success':
-        return 'bg-success/10 border-success/20';
+        return 'bg-white border-success/30 border-l-4 border-l-success';
       case 'error':
-        return 'bg-error/10 border-error/20';
+        return 'bg-white border-error/30 border-l-4 border-l-error';
       case 'warning':
-        return 'bg-warning/10 border-warning/20';
+        return 'bg-white border-warning/30 border-l-4 border-l-warning';
       case 'info':
-        return 'bg-info/10 border-info/20';
+        return 'bg-white border-info/30 border-l-4 border-l-info';
       default:
-        return 'bg-content-bg border-card-border';
+        return 'bg-white border-card-border';
     }
   };
 
   return (
     <div
       className={`
-        relative max-w-md w-full bg-content-bg shadow-modal rounded-lg border pointer-events-auto
+        relative max-w-xl w-full bg-white shadow-modal rounded-lg border pointer-events-auto
         transition-all duration-300 ease-in-out transform
         ${isVisible && !isLeaving ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}
         ${getColorClasses()}
@@ -123,7 +123,7 @@ export default function NotificationToast({ notification, onDismiss }: Notificat
       </div>
       
       {/* Progress bar for timed notifications */}
-      {notification.duration && notification.duration > 0 && (
+      {notification.duration !== undefined && notification.duration > 0 && (
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-card-border rounded-b-lg overflow-hidden">
           <div 
             className={`h-full notification-progress ${

@@ -23,7 +23,7 @@ const businessPaths = [
   ...clientPaths,
 ];
 
-const adminPaths = ["/admin", ...businessPaths];
+const adminPaths = ["/admin", "/demo", ...businessPaths];
 
 const pathsByRole: Record<string, string[]> = {
   client: clientPaths,
