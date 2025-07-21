@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import PaymentModel from '@/lib/models/Payment';
-import { connectToDatabase } from '@/lib/db';
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import PaymentModel from "@/lib/models/Payment";
+import { connectToDatabase } from "@/lib/db";
 
 // GET /api/payments/[id] - Get specific payment
 export async function GET(
@@ -12,7 +12,7 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const businessId = session.user.id;
@@ -20,22 +20,18 @@ export async function GET(
 
     const payment = await PaymentModel.findOne({
       _id: params.id,
-      businessId
+      businessId,
     });
 
     if (!payment) {
-      return NextResponse.json(
-        { error: 'Payment not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Payment not found" }, { status: 404 });
     }
 
     return NextResponse.json({ payment });
-
   } catch (error) {
-    console.error('Error fetching payment:', error);
+    console.error("Error fetching payment:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch payment' },
+      { error: "Failed to fetch payment" },
       { status: 500 }
     );
   }
@@ -49,7 +45,7 @@ export async function PATCH(
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const businessId = session.user.id;
@@ -60,34 +56,32 @@ export async function PATCH(
 
     const payment = await PaymentModel.findOne({
       _id: params.id,
-      businessId
+      businessId,
     });
 
     if (!payment) {
-      return NextResponse.json(
-        { error: 'Payment not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Payment not found" }, { status: 404 });
     }
 
     // Update fields
     if (status) payment.status = status;
     if (transactionId) payment.transactionId = transactionId;
-    if (providerData) payment.providerData = { ...payment.providerData, ...providerData };
+    if (providerData)
+      payment.providerData = { ...payment.providerData, ...providerData };
     if (metadata) payment.metadata = { ...payment.metadata, ...metadata };
 
     // Set paidAt timestamp when marking as completed
-    if (status === 'completed' && !payment.paidAt) {
+    if (status === "completed" && !payment.paidAt) {
       payment.paidAt = new Date();
     }
 
     // Handle manual payment notes
-    if (payment.paymentMethod === 'cash' && notes) {
+    if (payment.paymentMethod === "cash" && notes) {
       payment.providerData = payment.providerData || {};
       payment.providerData.manual = {
         ...payment.providerData.manual,
         notes,
-        receivedBy: session.user.name || 'Unknown'
+        receivedBy: session.user.name || "Unknown",
       };
     }
 
@@ -95,13 +89,12 @@ export async function PATCH(
 
     return NextResponse.json({
       payment,
-      message: 'Payment updated successfully'
+      message: "Payment updated successfully",
     });
-
   } catch (error) {
-    console.error('Error updating payment:', error);
+    console.error("Error updating payment:", error);
     return NextResponse.json(
-      { error: 'Failed to update payment' },
+      { error: "Failed to update payment" },
       { status: 500 }
     );
   }
@@ -115,7 +108,7 @@ export async function DELETE(
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const businessId = session.user.id;
@@ -123,36 +116,32 @@ export async function DELETE(
 
     const payment = await PaymentModel.findOne({
       _id: params.id,
-      businessId
+      businessId,
     });
 
     if (!payment) {
-      return NextResponse.json(
-        { error: 'Payment not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Payment not found" }, { status: 404 });
     }
 
     // Only allow deletion of pending payments
-    if (!['pending', 'failed', 'expired'].includes(payment.status)) {
+    if (!["pending", "failed", "expired"].includes(payment.status)) {
       return NextResponse.json(
-        { error: 'Cannot delete completed or processing payments' },
+        { error: "Cannot delete completed or processing payments" },
         { status: 400 }
       );
     }
 
     // Instead of deleting, mark as cancelled for audit trail
-    payment.status = 'cancelled';
+    payment.status = "cancelled";
     await payment.save();
 
     return NextResponse.json({
-      message: 'Payment cancelled successfully'
+      message: "Payment cancelled successfully",
     });
-
   } catch (error) {
-    console.error('Error cancelling payment:', error);
+    console.error("Error cancelling payment:", error);
     return NextResponse.json(
-      { error: 'Failed to cancel payment' },
+      { error: "Failed to cancel payment" },
       { status: 500 }
     );
   }

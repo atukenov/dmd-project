@@ -1,28 +1,38 @@
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import PaymentModel from '@/lib/models/Payment';
-import { connectToDatabase } from '@/lib/db';
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import PaymentModel from "@/lib/models/Payment";
+import { connectToDatabase } from "@/lib/db";
 
 // GET /api/payments - List payments with filtering
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // For now, use user ID as business ID (can be modified later)
     const businessId = session.user.id;
 
-    await connectToDatabase();
+    const { db } = await connectToDatabase();
+
+    if (!db) {
+      return NextResponse.json(
+        {
+          error:
+            "Database connection not available. Please check MongoDB connection.",
+        },
+        { status: 503 }
+      );
+    }
 
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
-    const appointmentId = searchParams.get('appointmentId');
-    const clientId = searchParams.get('clientId');
-    const limit = parseInt(searchParams.get('limit') || '20');
-    const page = parseInt(searchParams.get('page') || '1');
+    const status = searchParams.get("status");
+    const appointmentId = searchParams.get("appointmentId");
+    const clientId = searchParams.get("clientId");
+    const limit = parseInt(searchParams.get("limit") || "20");
+    const page = parseInt(searchParams.get("page") || "1");
 
     // Build query
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -33,8 +43,7 @@ export async function GET(request: Request) {
 
     // Execute query with pagination
     const skip = (page - 1) * limit;
-    const payments = await PaymentModel
-      .find(query)
+    const payments = await PaymentModel.find(query)
       .sort({ createdAt: -1 })
       .limit(limit)
       .skip(skip)
@@ -48,14 +57,13 @@ export async function GET(request: Request) {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     });
-
   } catch (error) {
-    console.error('Error fetching payments:', error);
+    console.error("Error fetching payments:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch payments' },
+      { error: "Failed to fetch payments" },
       { status: 500 }
     );
   }
@@ -66,37 +74,47 @@ export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // For now, use user ID as business ID (can be modified later)
     const businessId = session.user.id;
 
-    await connectToDatabase();
+    const { db } = await connectToDatabase();
+
+    if (!db) {
+      return NextResponse.json(
+        {
+          error:
+            "Database connection not available. Please check MongoDB connection.",
+        },
+        { status: 503 }
+      );
+    }
 
     const body = await request.json();
     const {
       amount,
-      currency = 'KZT',
+      currency = "KZT",
       description,
       paymentMethod,
       appointmentId,
       clientId,
       providerData,
-      metadata
+      metadata,
     } = body;
 
     // Validation
     if (!amount || !paymentMethod) {
       return NextResponse.json(
-        { error: 'Amount and payment method are required' },
+        { error: "Amount and payment method are required" },
         { status: 400 }
       );
     }
 
     if (amount <= 0) {
       return NextResponse.json(
-        { error: 'Amount must be greater than 0' },
+        { error: "Amount must be greater than 0" },
         { status: 400 }
       );
     }
@@ -112,11 +130,18 @@ export async function POST(request: Request) {
       appointmentId,
       clientId,
       providerData,
-      metadata: metadata || {}
+      metadata: metadata || {},
     };
 
+    // Generate reference ID if not provided
+    if (!paymentData.referenceId) {
+      const timestamp = Date.now().toString(36);
+      const randomStr = Math.random().toString(36).substring(2, 8);
+      paymentData.referenceId = `PAY-${timestamp}-${randomStr}`.toUpperCase();
+    }
+
     // Set QR code expiry for QR payments
-    if (paymentMethod === 'kaspi_qr') {
+    if (paymentMethod === "kaspi_qr") {
       // QR codes expire in 15 minutes
       paymentData.qrCodeExpiry = new Date(Date.now() + 15 * 60 * 1000);
     }
@@ -124,15 +149,17 @@ export async function POST(request: Request) {
     const payment = new PaymentModel(paymentData);
     await payment.save();
 
-    return NextResponse.json({ 
-      payment,
-      message: 'Payment created successfully'
-    }, { status: 201 });
-
-  } catch (error) {
-    console.error('Error creating payment:', error);
     return NextResponse.json(
-      { error: 'Failed to create payment' },
+      {
+        payment,
+        message: "Payment created successfully",
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Error creating payment:", error);
+    return NextResponse.json(
+      { error: "Failed to create payment" },
       { status: 500 }
     );
   }
